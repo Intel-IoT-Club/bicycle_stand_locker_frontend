@@ -22,3 +22,23 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.env
+
+/dist
+/build
+
+*.tgz
+
+.vscode/
+
+.DS_Store
+
+Thumbs.db
+
+.idea/
+
+coverage/
+
+# package-lock.json
+# yarn.lock
