@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All QR Codes</title>
+    <script>
+        const eventSource = new EventSource('/stream');
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const qrContainer = document.getElementById('qrcodes');
+
+            data.forEach(qr => {
+                const qrDiv = document.createElement('div');
+                qrDiv.innerHTML = ` 
+                    <p>Location ID: ${qr.locationid}</p>
+                    <p>Timestamp: ${new Date(qr.timestamp).toLocaleString()}</p>
+                    <img src="${qr.qrData}" alt="QR Code for ${qr.locationid}">
+                `;
+                qrContainer.insertBefore(qrDiv, qrContainer.firstChild); // Insert new content at the top
+            });
+        };
+    </script>
+</head>
+
+<body>
+    <h1>All QR Codes</h1>
+    <div id="qrcodes"></div>
+</body>
+
+</html>

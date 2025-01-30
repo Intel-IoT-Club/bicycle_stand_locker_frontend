@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaints</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <style>
+        .faq-answer {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white p-6">
+    <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        <!-- Report an Issue Form -->
+        <div id="reportForm" class="bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-700">
+            <h2 class="text-2xl font-bold text-blue-400 mb-6">Report an Issue</h2>
+            <form id="complaintsForm">
+                <div class="mb-4">
+                    <label class="block text-sm mb-2">Name</label>
+                    <input type="text" name="name" id="name" required
+                        class="w-full p-3 rounded bg-gray-900 border border-gray-600 focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm mb-2">Email</label>
+                    <input type="email" name="email" id="email" required
+                        class="w-full p-3 rounded bg-gray-900 border border-gray-600 focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm mb-2">Issue Type</label>
+                    <select name="issueType" id="issueType" required
+                        class="w-full p-3 rounded bg-gray-900 border border-gray-600 focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Issue Type</option>
+                        <option value="Damaged Station">Damaged Station</option>
+                        <option value="QR Code Not Working">QR Code Not Working</option>
+                        <option value="Payment Issue">Payment Issue</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm mb-2">Docking Station ID</label>
+                    <input type="text" name="stationId" id="stationId" required
+                        class="w-full p-3 rounded bg-gray-900 border border-gray-600 focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm mb-2">Description</label>
+                    <textarea name="description" id="description" required
+                        class="w-full p-3 rounded bg-gray-900 border border-gray-600 focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded transition transform hover:scale-105">
+                    Submit
+                </button>
+            </form>
+        </div>
+
+        <!-- FAQs -->
+        <div id="faqSection" class="bg-gray-800 shadow-lg rounded-lg p-6 border border-gray-700">
+            <h2 class="text-2xl font-bold text-blue-400 mb-6">Frequently Asked Questions</h2>
+            <div id="faqs">
+                <!-- FAQ items will be dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Handle form submission
+            const form = document.getElementById("complaintsForm");
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById("name").value;
+                const email = document.getElementById("email").value;
+                const issueType = document.getElementById("issueType").value;
+                const stationId = document.getElementById("stationId").value;
+                const description = document.getElementById("description").value;
+
+                const formData = { name, email, issueType, stationId, description };
+
+                try {
+                    const response = await fetch("http://localhost:3000/api/complaints", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(formData),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Submitted!",
+                            text: "Your complaint has been submitted successfully.",
+                        });
+                        form.reset();
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: result.message || "Something went wrong!",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error submitting complaint:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Failed",
+                        text: "Failed to submit the complaint. Please try again.",
+                    });
+                }
+            });
+
+            // FAQ Data
+            const faqs = [
+                {
+                    question: "What if my bike is stolen?",
+                    answer: "Contact support immediately for assistance.",
+                },
+                {
+                    question: "How to report a damaged docking station?",
+                    answer: "Use the report issue form to submit your complaint.",
+                },
+                {
+                    question: "Can I reserve a docking station?",
+                    answer: "Currently, reservations are not supported.",
+                },
+                {
+                    question: "What payment methods are accepted?",
+                    answer: "We accept credit cards and UPI payments.",
+                },
+                {
+                    question: "How to reset my password?",
+                    answer: "Go to the login page and click on 'Forgot Password'.",
+                },
+            ];
+
+            // Render FAQs dynamically
+            const faqContainer = document.getElementById("faqs");
+
+            faqs.forEach((faq, index) => {
+                const faqItem = document.createElement("div");
+                faqItem.className = "mb-4";
+
+                const faqButton = document.createElement("button");
+                faqButton.className =
+                    "w-full text-left bg-gray-900 p-3 rounded-lg flex justify-between items-center hover:bg-gray-700 transition";
+                faqButton.innerHTML = `<span>${faq.question}</span><span>+</span>`;
+                faqButton.addEventListener("click", () => toggleFAQ(index));
+
+                const faqAnswer = document.createElement("div");
+                faqAnswer.className =
+                    "faq-answer p-3 bg-gray-900 mt-2 rounded-lg";
+                faqAnswer.innerHTML = faq.answer;
+
+                faqItem.appendChild(faqButton);
+                faqItem.appendChild(faqAnswer);
+                faqContainer.appendChild(faqItem);
+            });
+
+            // Toggle FAQ Answer Visibility
+            const toggleFAQ = (index) => {
+                const answers = document.querySelectorAll(".faq-answer");
+                const buttons = document.querySelectorAll("#faqs button span:last-child");
+
+                answers.forEach((answer, i) => {
+                    if (i === index) {
+                        const isVisible = answer.style.display === "block";
+                        answer.style.display = isVisible ? "none" : "block";
+                        buttons[i].textContent = isVisible ? "+" : "-";
+                    } else {
+                        answer.style.display = "none";
+                        buttons[i].textContent = "+";
+                    }
+                });
+            };
+        });
+    </script>
+</body>
+
+</html>

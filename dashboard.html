@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script>
+        // Check if user is logged in
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (!loggedInUser) {
+            window.location.href = "/login.html"; // Redirect to login if not logged in
+        }
+
+        // Logout function
+        async function logout() {
+            await fetch("/logout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: loggedInUser }),
+            });
+
+            localStorage.removeItem("loggedInUser");
+            localStorage.removeItem("locationId"); // Clear locationId if it's set
+            window.location.href = "/login.html";
+        }
+
+        // Unlock function
+        async function unlock() {
+            try {
+                const response = await fetch("/unlock", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email: loggedInUser }), // Send the logged-in user's email
+                });
+
+                const data = await response.json();
+
+                if (data.message === "unlocked") {
+                    alert("Bicycle unlocked successfully!");
+                } else if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert("Something went wrong!");
+                }
+            } catch (error) {
+                console.error("Error unlocking bicycle:", error);
+                alert("Error unlocking bicycle. Please try again.");
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Welcome to Dashboard</h1>
+    <button onclick="logout()">Logout</button>
+    <button onclick="unlock()">Unlock</button> <!-- Unlock button -->
+</body>
+
+</html>
