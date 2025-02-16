@@ -1,4 +1,3 @@
-# Steps to get started
-### 1) npm init
-### 2) npm install i(dependencies)
-### 3) npm start
+# Quick Tips
+### 1) npm run build
+### 2) npm run start
