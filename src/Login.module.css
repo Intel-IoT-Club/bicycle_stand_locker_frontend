@@ -1,0 +1,183 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@keyframes backgroundAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.sublogcontain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    display: flex;background: linear-gradient(135deg, #fbc2eb, #a6c1ee, #fbc2eb);
+        background-size: 300% 300%;
+        animation: backgroundAnimation 8s ease infinite;
+    justify-content: center;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.containerForLogin {
+    width: 40%;
+    min-height: 35vh;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(20px);
+    padding: 40px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    transition: all 0.4s ease-in-out;
+    margin: 10px;
+}
+
+.h1forlog {margin: 10px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #4a4a4a;
+    margin-bottom: 20px;
+    text-transform: capitalize;
+}
+
+.buttonCont {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.buttonCont button {
+    width: 48%;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    color: white;
+    border: none;
+    padding: 14px;margin-left: 10px;
+        margin-right: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s ease-in-out;
+}
+
+.buttonCont button:hover {
+    background: linear-gradient(135deg, #fad0c4, #ff9a9e);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.buttonCont button.active {
+    background: linear-gradient(135deg, #fad0c4, #ff9a9e);
+}
+
+.formContainer {
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.formContainer.active {
+    display: block;
+}
+
+
+.labelforlog {
+    font-weight: 600;text-align: center;
+    margin-bottom: 10px;
+    color: #4a4a4a;
+    font-size: 16px;
+}
+
+.inputforlog {
+    width: 80%;
+    padding: 15px;
+    border: 2px solid #ff9a9e;
+    border-radius: 12px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    transition: 0.3s ease-in-out;margin: 15px;
+}
+
+.inputforlog:focus {
+    border-color: #fad0c4;
+    outline: none;
+    box-shadow: 0 0 10px rgba(255, 173, 173, 0.4);
+}
+.formerlogeroflo {
+    position: relative;margin-top: 10%;
+}
+.formGroup {
+    position: relative;display: flex;flex-direction: column;justify-content: center;align-items: center;
+}
+.submitforlog[type="submit"] {
+    width: 40%;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 12px;
+    margin-top: 7%;
+    transition: all 0.3s ease-in-out;
+}
+
+.submitforlog[type="submit"]:hover {
+    background: linear-gradient(135deg, #ff7eb3, #ff758c);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .containerForLogin {
+        width: 80%;
+        padding: 30px;
+    }
+
+    .buttonCont button {
+        width: 48%;
+    }
+
+    .submitforlog[type="submit"] {
+        width: 80%;
+    }
+}
