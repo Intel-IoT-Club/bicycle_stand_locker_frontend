@@ -1,0 +1,78 @@
+.backgroundforscane {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to bottom right, #4b6cb7, #182848);
+    overflow: hidden;
+}
+
+.animation-containerforscane {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.animation-containerforscane .circle {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    filter: blur(30px);
+    animation: float 10s infinite alternate ease-in-out;
+}
+
+.animation-containerforscane .circle1 {
+    top: 10%;
+    left: 20%;
+    animation-duration: 8s;
+}
+
+.animation-containerforscane .circle2 {
+    bottom: 20%;
+    right: 15%;
+    animation-duration: 12s;
+}
+
+.animation-containerforscane .circle3 {
+    bottom: 30%;
+    left: 50%;
+    animation-duration: 14s;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    100% {
+        transform: translateY(30px);
+    }
+}
+
+.status-containerforscan {
+    position: relative;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px 40px;
+    border-radius: 12px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 2;
+}
+
+.status-containerforscan h1 {
+    font-size: 1.9em;margin-bottom: 10px;
+    color: #333;margin: 10px;padding: 10px;font-family:'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+}
+
+.status-containerforscan p {position: relative;
+    font-size: 1.4em;top: 5%;
+    color: #555;margin: 10px;padding-top: 10px;
+}
