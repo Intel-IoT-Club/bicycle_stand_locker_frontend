@@ -14,7 +14,7 @@ const Complaints = () => {
     const [activeFAQ, setActiveFAQ] = useState(null);
 
     const faqs = [
-        { question: "What if my bike is stolen?", answer: "Contact support immediately." },
+        { question: "What if my bike is Stolen?", answer: "Contact support immediately." },
         { question: "How to report a damaged docking station?", answer: "Use the report issue button on the dashboard." },
         { question: "Can I reserve a docking station?", answer: "Currently, reservations are not supported." },
         { question: "What payment methods are accepted?", answer: "We accept credit cards and UPI." },
