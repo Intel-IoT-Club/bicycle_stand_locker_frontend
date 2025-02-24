@@ -18,7 +18,7 @@ const QRCodeGenerator = () => {
         }
 
         try {
-            const response = await axios.post("/generate", { locationid: locationId });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/generate`, { locationid: locationId });
 
             if (response.status === 200 || response.status === 201) {
                 setMessage("Successfully Generated. Thank you!");
