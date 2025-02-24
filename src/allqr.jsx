@@ -7,16 +7,17 @@ const QRCodeStream = () => {
     const [error, setError] = useState(null);
 
     const fetchQRCodes = async () => {
-        console.log("API URL:", process.env.REACT_APP_API_URL);
+        console.log("API URL being used:", process.env.REACT_APP_API_URL); // Debugging output
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/stream`);
-            console.log("Response Data:", response.data); 
+            console.log("API Response:", response.data); // Debugging output
             setQrCodes(response.data);
         } catch (error) {
-            console.error("Error fetching QR codes:", error);
-            setError("Failed to load QR codes. Please try again later.");
+            console.error("Error fetching QR codes:", error.message);
+            setError("Failed to load QR codes.");
         }
     };
+
 
     useEffect(() => {
         fetchQRCodes();
