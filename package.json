@@ -22,7 +22,7 @@
     "start": "concurrently \"npm run frontend\" \"npm run backend\"",
     "frontend": "react-scripts start",
     "backend": "node backend/server.js",
-    "build": "react-app-rewired build",
+    "build": "react-scripts build && mv build dist",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
