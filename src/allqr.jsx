@@ -7,8 +7,10 @@ const QRCodeStream = () => {
     const [error, setError] = useState(null);
 
     const fetchQRCodes = async () => {
+        console.log("API URL:", process.env.REACT_APP_API_URL);
         try {
             const response = await axios.get(`${process.env.REACT_APP_API_URL}/stream`);
+            console.log("Response Data:", response.data); 
             setQrCodes(response.data);
         } catch (error) {
             console.error("Error fetching QR codes:", error);
