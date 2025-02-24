@@ -29,7 +29,7 @@ const Complaints = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:5234/api/complaints", formData, {
+            await axios.post(`${process.env.REACT_APP_API_URL}/api/complaints`, formData, {
                 headers: { "Content-Type": "application/json" },
             });
             alert("Your complaint/feedback has been submitted successfully!");

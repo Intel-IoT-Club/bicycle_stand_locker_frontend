@@ -15,7 +15,7 @@ const ComplaintsList = () => {
 
         const fetchComplaints = async () => {
             try {
-                const response = await axios.get("http://localhost:3000/api/complaints");
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/complaints`);
 
                 console.log("Fetched complaints:", response.data);
                 setComplaints(response.data);
