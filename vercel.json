@@ -9,24 +9,6 @@
             }
         }
     ],
-    "routes": [
-        {
-            "src": "/manifest.json",
-            "dest": "/manifest.json"
-        },
-        {
-            "src": "/favicon.ico",
-            "dest": "/favicon.ico"
-        },
-        {
-            "src": "/logo192.png",
-            "dest": "/logo192.png"
-        },
-        {
-            "src": "/logo512.png",
-            "dest": "/logo512.png"
-        }
-    ],
     "rewrites": [
         {
             "source": "/api/(.*)",
@@ -35,6 +17,17 @@
         {
             "source": "/(.*)",
             "destination": "/index.html"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/manifest.json",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/manifest+json"
+                }
+            ]
         }
     ]
 }
