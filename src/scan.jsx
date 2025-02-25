@@ -28,7 +28,7 @@ const BicycleStatus = () => {
             }
 
             try {
-                const { data } = await axios.get(`/getBicycleId`, { params: { email } });
+                const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/getBicycleId`, { params: { email } });
 
                 if (data.bicycleId) {
                     setBicycleId(`Roll Number: ${data.bicycleId}`);
@@ -46,7 +46,7 @@ const BicycleStatus = () => {
 
         const fetchScanStatus = async (email, bicycleId, locationId) => {
             try {
-                const { data } = await axios.get(`/scan`, { params: { email, locationId, bicycleId } });
+                const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/scan`, { params: { email, locationId, bicycleId } });
 
                 setStatusMessage(data.message ? `Status: ${data.message}` : "No status available.");
             } catch (error) {
@@ -59,14 +59,12 @@ const BicycleStatus = () => {
 
     return (
         <div className="backgroundforscane">
-            {}
             <div className="animation-containerforscane">
                 <div className="circle circle1"></div>
                 <div className="circle circle2"></div>
                 <div className="circle circle3"></div>
             </div>
 
-            {}
             <div className="status-containerforscan">
                 <h1>Bicycle Status</h1>
                 <p>{bicycleId}</p>

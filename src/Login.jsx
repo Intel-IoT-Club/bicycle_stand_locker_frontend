@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import styles from "./Login.module.css"; 
+import styles from "./Login.module.css";
 
 const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -69,58 +69,57 @@ const Login = () => {
 
     return (
         <div className={styles.sublogcontain}>
-            
-        <div className={styles.containerForLogin}>
-            <div className={styles.buttonCont}>
-                <button className={isLogin ? styles.active : ""} onClick={() => setIsLogin(true)}>Login</button>
-                <button className={!isLogin ? styles.active : ""} onClick={() => setIsLogin(false)}>Signup</button>
-            </div>
+            <div className={styles.containerForLogin}>
+                <div className={styles.buttonCont}>
+                    <button className={isLogin ? styles.active : ""} onClick={() => setIsLogin(true)}>Login</button>
+                    <button className={!isLogin ? styles.active : ""} onClick={() => setIsLogin(false)}>Signup</button>
+                </div>
 
-            <div className={`${styles.formContainer} ${isLogin ? styles.active : ""}`}>
+                <div className={`${styles.formContainer} ${isLogin ? styles.active : ""}`}>
                     <h1 className={styles.h1forlog}>Login</h1>
                     <form onSubmit={handleSubmit} className={styles.formerlogeroflo}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>Email:</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} className={styles.inputforlog} required />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>Password:</label>
-                        <input type="password" name="password" value={formData.password} onChange={handleChange} className={styles.inputforlog} required />
-                    </div>
-                    <button type="submit" className={styles.submitforlog}>Login</button>
-                </form>
-            </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>Email:</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} className={styles.inputforlog} required />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>Password:</label>
+                            <input type="password" name="password" value={formData.password} onChange={handleChange} className={styles.inputforlog} required />
+                        </div>
+                        <button type="submit" className={styles.submitforlog}>Login</button>
+                    </form>
+                </div>
 
-            <div className={`${styles.formContainer} ${!isLogin ? styles.active : ""}`}>
-                <h1 className={styles.h1forlog}>Signup</h1>
-                <form onSubmit={handleSubmit} className={styles.formerlogeroflo}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>First Name:</label>
-                        <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={styles.inputforlog} required />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>Last Name:</label>
-                        <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className={styles.inputforlog} required />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>Email:</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} className={styles.inputforlog} required />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>Password:</label>
-                        <input type="password" name="password" value={formData.password} onChange={handleChange} className={styles.inputforlog} required />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.labelforlog}>Re-enter Password:</label>
-                        <input type="password" name="reenterPassword" value={formData.reenterPassword} onChange={handleChange} className={styles.inputforlog} required />
+                <div className={`${styles.formContainer} ${!isLogin ? styles.active : ""}`}>
+                    <h1 className={styles.h1forlog}>Signup</h1>
+                    <form onSubmit={handleSubmit} className={styles.formerlogeroflo}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>First Name:</label>
+                            <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} className={styles.inputforlog} required />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>Last Name:</label>
+                            <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} className={styles.inputforlog} required />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>Email:</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} className={styles.inputforlog} required />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>Password:</label>
+                            <input type="password" name="password" value={formData.password} onChange={handleChange} className={styles.inputforlog} required />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.labelforlog}>Re-enter Password:</label>
+                            <input type="password" name="reenterPassword" value={formData.reenterPassword} onChange={handleChange} className={styles.inputforlog} required />
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.labelforlog}>Bicycle id:</label>
                             <input type="text" name="bicycleId" value={formData.bicycleId} onChange={handleChange} className={styles.inputforlog} required />
                         </div>
                         <button type="submit" className={styles.submitforlog}>Signup</button>
-                </form>
-            </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
