@@ -58,7 +58,7 @@ const Login = () => {
                     return;
                 }
 
-                const response = await axios.post("/signup", formData);
+                const response = await axios.post(`${process.env.REACT_APP_API_URL}/signup`, formData);
                 alert(response.data.message);
                 setIsLogin(true);
             }
