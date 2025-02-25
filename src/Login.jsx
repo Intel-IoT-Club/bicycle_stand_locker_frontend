@@ -37,20 +37,25 @@ const Login = () => {
                 });
 
                 localStorage.setItem("loggedInUser", response.data.email);
+                const email = response.data.email;
 
-                if (redirectUrl?.includes("/scan")) {
-                    const redirectParams = new URL(redirectUrl, window.location.origin).searchParams;
+                if (redirectUrl?.startsWith("/scan")) {
+                    // Extract locationId from the redirect URL
+                    const redirectParams = new URLSearchParams(new URL(redirectUrl, window.location.origin).search);
                     const locationId = redirectParams.get("locationid");
 
                     if (locationId) {
-                        const bicycleResponse = await axios.get(`${process.env.REACT_APP_API_URL}/getBicycle?email=${response.data.email}`);
-                        const bicycleId = bicycleResponse.data.bicycleId;
+                        // Fetch bicycleId
+                        const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/getBicycle`, { params: { email } });
+                        const bicycleId = data.bicycleId;
 
-                        navigate(`/scan?email=${encodeURIComponent(response.data.email)}&locationid=${encodeURIComponent(locationId)}&bicycleId=${encodeURIComponent(bicycleId)}`);
+                        // Redirect to scan with correct params
+                        navigate(`/scan?email=${encodeURIComponent(email)}&locationid=${encodeURIComponent(locationId)}&bicycleId=${encodeURIComponent(bicycleId)}`);
                         return;
                     }
                 }
 
+                // If no scan redirect, go to dashboard
                 navigate("/dashboard");
             } else {
                 if (formData.password !== formData.reenterPassword) {
