@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import styles from "./stylefordash.module.css"; 
+import styles from "./stylefordash.module.css";
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
     const logout = async () => {
         try {
-            await axios.post("/logout", { email });
+            await axios.post(`${process.env.REACT_APP_API_URL}/logout`, { email });
             localStorage.removeItem("loggedInUser");
             localStorage.removeItem("locationId");
             navigate("/login");
@@ -29,7 +29,7 @@ const Dashboard = () => {
 
     const unlock = async () => {
         try {
-            const response = await axios.post("/unlock", { email });
+            const response = await axios.post(`${process.env.REACT_APP_API_URL}/unlock`, { email });
             if (response.data.message === "unlocked") {
                 alert("Bicycle unlocked successfully!");
             } else if (response.data.error) {
@@ -49,9 +49,8 @@ const Dashboard = () => {
             <div className={styles.temporarybuttonflex}>
                 <button className={styles.buttonfordashb} onClick={logout}>Logout</button>
                 <button className={styles.buttonfordashb} onClick={unlock}>Unlock</button>
-
             </div>
-            </div>
+        </div>
     );
 };
 
