@@ -40,22 +40,18 @@ const Login = () => {
                 const email = response.data.email;
 
                 if (redirectUrl?.startsWith("/scan")) {
-                    // Extract locationId from the redirect URL
                     const redirectParams = new URLSearchParams(new URL(redirectUrl, window.location.origin).search);
                     const locationId = redirectParams.get("locationid");
 
                     if (locationId) {
-                        // Fetch bicycleId
                         const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/getBicycle`, { params: { email } });
                         const bicycleId = data.bicycleId;
 
-                        // Redirect to scan with correct params
                         navigate(`https://bicycle-locker.vercel.app/scan?email=${encodeURIComponent(email)}&locationid=${encodeURIComponent(locationId)}&bicycleId=${encodeURIComponent(bicycleId)}`);
                         return;
                     }
                 }
 
-                // If no scan redirect, go to dashboard
                 navigate("/dashboard");
             } else {
                 if (formData.password !== formData.reenterPassword) {
