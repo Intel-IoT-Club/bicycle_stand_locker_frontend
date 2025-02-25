@@ -50,7 +50,7 @@ const Login = () => {
                         const bicycleId = data.bicycleId;
 
                         // Redirect to scan with correct params
-                        navigate(`/scan?email=${encodeURIComponent(email)}&locationid=${encodeURIComponent(locationId)}&bicycleId=${encodeURIComponent(bicycleId)}`);
+                        navigate(`https://bicycle-locker.vercel.app/scan?email=${encodeURIComponent(email)}&locationid=${encodeURIComponent(locationId)}&bicycleId=${encodeURIComponent(bicycleId)}`);
                         return;
                     }
                 }
