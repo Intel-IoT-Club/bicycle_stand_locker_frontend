@@ -31,7 +31,7 @@ const Login = () => {
         e.preventDefault();
         try {
             if (isLogin) {
-                const response = await axios.post("/login", {
+                const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
                     email: formData.email,
                     password: formData.password,
                 });
@@ -43,7 +43,7 @@ const Login = () => {
                     const locationId = redirectParams.get("locationid");
 
                     if (locationId) {
-                        const bicycleResponse = await axios.get(`/getBicycle?email=${response.data.email}`);
+                        const bicycleResponse = await axios.get(`${process.env.REACT_APP_API_URL}/getBicycle?email=${response.data.email}`);
                         const bicycleId = bicycleResponse.data.bicycleId;
 
                         navigate(`/scan?email=${encodeURIComponent(response.data.email)}&locationid=${encodeURIComponent(locationId)}&bicycleId=${encodeURIComponent(bicycleId)}`);
