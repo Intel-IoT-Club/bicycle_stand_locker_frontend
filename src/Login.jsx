@@ -17,7 +17,7 @@ const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const redirectUrl = new URLSearchParams(location.search).get("redirect");
-
+    const decodedRedirectUrl = redirectUrl ? decodeURIComponent(redirectUrl) : null;
     useEffect(() => {
         const loggedInUser = localStorage.getItem("loggedInUser");
         if (loggedInUser) navigate(redirectUrl || "/dashboard");
@@ -39,8 +39,8 @@ const Login = () => {
                 localStorage.setItem("loggedInUser", response.data.email);
                 const email = response.data.email;
 
-                if (redirectUrl?.startsWith("/scan")) {
-                    const redirectParams = new URLSearchParams(new URL(redirectUrl, window.location.origin).search);
+                if (decodedRedirectUrl?.startsWith("https://bicycle-locker.vercel.app/scan")) {
+                    const redirectParams = new URLSearchParams(new URL(decodedRedirectUrl).search);
                     const locationId = redirectParams.get("locationid");
 
                     if (locationId) {
