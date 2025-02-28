@@ -6,6 +6,7 @@ import "./BicycleStatus.css";
 const BicycleStatus = () => {
     const [bicycleId, setBicycleId] = useState("Loading Bicycle ID...");
     const [statusMessage, setStatusMessage] = useState("Loading status...");
+    const [errorMessage, setErrorMessage] = useState("");
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const hasFetched = useRef(false);
@@ -48,9 +49,28 @@ const BicycleStatus = () => {
             try {
                 const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/scan`, { params: { email, locationId, bicycleId } });
 
+                // TO CHECK the user with same lock if cycle is locked
+                if (data.message) {
+                    setStatusMessage(`Status: ${data.message}`);
+                    setErrorMessage("");
+                } else {
+                    setStatusMessage("No Status Available!");
+                }
                 setStatusMessage(data.message ? `Status: ${data.message}` : "No status available.");
             } catch (error) {
-                setStatusMessage("Error fetching status.");
+                if (error.response && error.response.status === 409) {
+                    setErrorMessage("This lock is already in use by another user!");
+                } else if (error.response && error.response.status === 500) {  //to redirect to scan page
+                    setErrorMessage("Failed to communicate with the ESP32. Please try again!");
+
+                    setTimeout(() => {
+                        navigate("/scan"); //go to scan page
+                    }, 3000);
+                }
+                else {
+                    setErrorMessage("Error fetching status.");
+                }
+                setStatusMessage("");
             }
         };
 
@@ -69,6 +89,8 @@ const BicycleStatus = () => {
                 <h1>Bicycle Status</h1>
                 <p>{bicycleId}</p>
                 <p>{statusMessage}</p>
+                {/*to display error message*/}
+                {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}  
             </div>
         </div>
     );
