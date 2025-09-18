@@ -1,12 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
-import Header from "./components/Auth/header";
-import Home from "./pages/Home";
-import AboutPage from "./pages/AboutPage";
+import Homepage from "./pages/HomePage";
 
 function App() {
   return (
     <>
+      {/* <Homepage/> */}
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage />} />

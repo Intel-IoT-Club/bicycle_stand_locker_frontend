@@ -1,12 +1,12 @@
-import HomeCycle from "../assets/Home_cycle.png";
-import SearchIcon from "../assets/Search_icon.png";
-import Header from "../components/Auth/header";
+import HomeCycle from "../../assets/Home_cycle.png";
+import SearchIcon from "../../assets/Search_icon.png";
+import Header from "../Header";
 
 const Home = () => {
   return (
     <>
       <Header />
-      <div className="h-auto bg-[#F9F8E9] pt-30 px-48 font-afacad m-0">
+      <div className="min-h-screen bg-[#F9F8E9] pt-30 px-48 font-afacad m-0">
         <div className="flex justify-between">
           <div className="flex flex-col gap-y-8 w-1/3 ">
             <div className="font-bold text-8xl ">Request A Ride</div>
