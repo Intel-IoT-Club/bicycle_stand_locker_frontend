@@ -3,12 +3,14 @@ import AuthPage from "./pages/AuthPage";
 import Homepage from "./pages/HomePage";
 import RideSummary from "./pages/RideSummary";
 import MyRides from "./pages/MyRides";
+import BikeUnlock from "./pages/BikeUnlock";
 
 function App() {
   return (
     <>
       {/* <Homepage/> */}
       {/* <MyRides/> */}
+      <BikeUnlock/>
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage />} />
