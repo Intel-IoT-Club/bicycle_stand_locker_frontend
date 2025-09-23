@@ -2,11 +2,13 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import Homepage from "./pages/HomePage";
 import RideSummary from "./pages/RideSummary";
+import MyRides from "./pages/MyRides";
 
 function App() {
   return (
     <>
       {/* <Homepage/> */}
+      {/* <MyRides/> */}
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage />} />
