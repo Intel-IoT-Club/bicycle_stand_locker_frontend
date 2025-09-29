@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import bicycleIcon from './assets/icon.png';
 
-const BACKEND = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BACKEND = import.meta.env.VITE_BACKEND_URL || "https://bicycle-locker.vercel.app";
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_RFY2rpzcInVgE8";
 const userId = "KeerthiVasan";
 
