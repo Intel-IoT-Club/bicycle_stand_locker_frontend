@@ -9,8 +9,11 @@ import RideTracking from "./pages/RideTracking";
 function App() {
   return (
     <>
-      {/* <Homepage/> */}
-      {/* <MyRides/> */}
+      {/* <Homepage/>
+      <BikeUnlock/>
+      <RideTracking/>
+      <RideSummary/>
+      <MyRides/> */}
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage />} />
