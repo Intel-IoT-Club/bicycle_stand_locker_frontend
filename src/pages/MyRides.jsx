@@ -1,4 +1,6 @@
 import Header from "../components/Header";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const mockupdata=
     [
@@ -107,6 +109,13 @@ const mockupdata=
 
 
 const MyRides=()=>{
+  const [cycles, setCycles] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:3000/api/cycles/all")
+      .then(res => setCycles(res.data))
+      .catch(err => console.error(err));
+  }, []);
     return(
         <>
         <Header/>
@@ -123,16 +132,16 @@ const MyRides=()=>{
                   <div className="p-2">Fare</div>
               </div>
 
-              {mockupdata.map(ride => (
-              <div key={ride["S.no"]} className="grid grid-cols-8  bg-white text-4xl flex items-center border m-4">
-                  <div className="p-2">{ride["S.no"]}</div>
-                  <div className="p-2">{ride["Date/Time"]}</div>
-                  <div className="p-2">{ride["Cycle-ID"]}</div>
-                  <div className="p-2">{ride["From"]}</div>
-                  <div className="p-2">{ride["To"]}</div>
-                  <div className="p-2">{ride["Distance"]}</div>
-                  <div className="p-2">{ride["Ride Time"]}</div>
-                  <div className="p-2">{ride["Fare"]}</div>
+              {cycles.map(ride => (
+              <div key={ride.cycleId} className="grid grid-cols-8  bg-white text-4xl flex items-center border m-4">
+                  <div className="p-2">{ride.cycleId}</div>
+                  <div className="p-2">{ride.lastSeen}</div>
+                  <div className="p-2">{ride.cycleId}</div>
+                  <div className="p-2">Station</div>
+                  <div className="p-2">Canteen</div>
+                  <div className="p-2">3.2Km</div>
+                  <div className="p-2">17:05</div>
+                  <div className="p-2">68</div>
               </div>
           ))}
         </div>

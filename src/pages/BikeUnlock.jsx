@@ -1,4 +1,6 @@
 import Thumbnail from "../assets/Mockup-Bicycle.png"
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const NearbyBikes=[
   {
@@ -53,6 +55,19 @@ const NearbyBikes=[
 
 
 const BikeUnlock=()=>{
+  const [cycles, setCycles] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:3000/api/cycles/all")
+      .then(res => {
+        console.log("Fetched cycles:", res.data.data);
+        setCycles(res.data.data || []);
+      })
+      .catch(err => {
+        console.error(err);
+        setCycles([]);
+      });
+  }, []);
     return(
         <>
         <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
@@ -66,18 +81,18 @@ const BikeUnlock=()=>{
                 <div className="text-2xl font-semibold">Chose A Ride</div>
                 
                
-                        {NearbyBikes.map((bike)=>(
+                        {cycles.map((bike)=>(
                     <div className="bg-white border flex h-auto w-full px-6 gap-5">
                         <div className="flex-1 "><img src={Thumbnail} alt="Bicycle-Thumbnail"/></div>
                         <div className="flex-2 border bg-[#F9F8E9] my-7.5 rounded-xl flex">
                             <div className="flex-3 ">
-                                <div className="text-4xl font-semibold">{bike.time} | {bike.duration}</div>
-                                <div className="text-2xl font-semibold">{bike.bike_name}</div>
+                                <div className="text-4xl font-semibold">{new Date(bike.lastSeen).toLocaleString("en-IN", {day: "2-digit",month: "2-digit",year: "numeric",hour: "2-digit",minute: "2-digit"})} | 68 min</div>
+                                <div className="text-2xl font-semibold">{bike.cycleName}</div>
                                 <div className="text-xl ">{bike.type}</div>
                                 
                             </div>
                             <div className="flex-2 text-white font-semibold">
-                                <div className="bg-black w-auto rounded-sm w-max text-2xl px-4 py-2 relative translate-x-1/4 translate-y-1/4">{bike.price}
+                                <div className="bg-black w-auto rounded-sm w-max text-2xl px-4 py-2 relative translate-x-1/4 translate-y-1/4">68₹
                                      <div className="bg-[#016766] rounded-sm w-max text-2xl  px-4 py-2 absolute">Start Ride</div>
                                 </div>
                                
