@@ -1,5 +1,8 @@
 import Thumbnail from "../assets/Mockup-Bicycle.png"
 import Dropdown from "../components/BikeUnlock/DropDown"
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 const NearbyBikes = [
   {
@@ -52,60 +55,71 @@ const NearbyBikes = [
   },
 ]
 
-const BikeUnlock = () => {
-  return (
-    <>
+
+const BikeUnlock=()=>{
+  const location = useLocation();
+  const { boarding, destination } = location.state || {};
+  const [cycles, setCycles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    if (!boarding || !destination) {
+      setLoading(false);
+      return;
+    }
+
+    axios.post("http://localhost:3000/api/cycles/search", { boarding, destination })
+      .then((res) => {
+        console.log("Fetched cycles:", res.data.cycles);
+        setCycles(res.data.cycles || [])
+      })
+      .catch((err) => {
+        console.error(err);
+        setCycles([]);
+      })
+      .finally(() => setLoading(false));
+  }, [boarding, destination]);
+
+  if (loading) return <div className="p-20 text-3xl">Loading rides near you...</div>;
+
+  return(
+      <>
       <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
-        <div className="flex-1 text-5xl border bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
-          MAP
-        </div>
-
-        <div className="flex-1 overflow-auto">
-          <div className="bg-black text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">
-            Bicycle Found Near You
-          </div>
-
-          <div className="flex justify-between items-center p-2">
-            <Dropdown options={["raghav", "chirag", "ak"]} title={"Sort By"} />
-            <div className="bg-[#016766] text-white flex justify-center text-3xl border py-2 px-4 cursor-pointer rounded-lg">
-              Filter By
-            </div>
-          </div>
-
-          <div className="text-2xl font-semibold mt-4">Choose A Ride</div>
-
-          {NearbyBikes.map((bike, index) => (
-            <div
-              key={index}
-              className="bg-white border flex h-auto w-full px-6 gap-5 my-4 py-4 rounded-xl"
-            >
-              <div className="flex-1">
-                <img src={Thumbnail} alt="Bicycle-Thumbnail" />
+          <div className="flex-1 text-5xl border bg-[#016766] text-white flex items-center justify-center border rounded-2xl border border-2 border-black">MAP</div>
+          <div className="flex-1 overflow-auto">
+              <div className="bg-black text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">Bicycle Found Near You</div>
+              <div className="flex">
+                  <div className="bg-[#016766] text-white flex flex-1 justify-center text-3xl border">Sort By</div>
+                  <div className="bg-[#016766] text-white flex flex-1 justify-center text-3xl border">Filter By</div>
               </div>
+              <div className="text-2xl font-semibold">Chose A Ride</div>
+              
+              
+                      {cycles.map((bike)=>(
+                  <div className="bg-white border flex h-auto w-full px-6 gap-5" key={bike._id}>
+                      <div className="flex-1 "><img src={Thumbnail} alt="Bicycle-Thumbnail"/></div>
+                      <div className="flex-2 border bg-[#F9F8E9] my-7.5 rounded-xl flex">
+                          <div className="flex-3 ">
+                              <div className="text-4xl font-semibold">{new Date(bike.lastSeen).toLocaleString("en-IN", {day: "2-digit",month: "2-digit",year: "numeric",hour: "2-digit",minute: "2-digit"})} | 68 min</div>
+                              <div className="text-2xl font-semibold">{bike.cycleName}</div>
+                              <div className="text-xl ">{bike.type}</div>
+                              
+                          </div>
+                          <div className="flex-2 text-white font-semibold">
+                              <div className="bg-black w-auto rounded-sm w-max text-2xl px-4 py-2 relative translate-x-1/4 translate-y-1/4">68₹
+                                    <div className="bg-[#016766] rounded-sm w-max text-2xl  px-4 py-2 absolute">Start Ride</div>
+                              </div>
+                              
+                          </div>
+                      </div>
 
-              <div className="flex-[2] border bg-[#F9F8E9] rounded-xl flex p-4">
-                <div className="flex-[3]">
-                  <div className="text-4xl font-semibold">
-                    {bike.time} | {bike.duration}
-                  </div>
-                  <div className="text-2xl font-semibold">{bike.bike_name}</div>
-                  <div className="text-xl">{bike.type}</div>
-                </div>
-
-                <div className="flex-[2] text-white font-semibold flex flex-col items-end justify-center gap-2">
-                  <div className="bg-black rounded-sm w-max text-2xl px-4 py-2">
-                    {bike.price}
-                  </div>
-                  <div className="bg-[#016766] rounded-sm w-max text-2xl px-4 py-2 cursor-pointer">
-                    {bike.button}
-                  </div>
-                </div>
+                  </div>         
+              ))}
               </div>
-            </div>
-          ))}
+            
         </div>
-      </div>
-    </>
+      </>
   )
 }
 
