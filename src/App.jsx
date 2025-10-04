@@ -4,13 +4,15 @@ import AuthPage from "./components/AuthPage";
 import MainPage from "./components/MainPage";
 import ForgotPasswordForm from "./components/ForgotPasswordForm";
 import ResetPasswordForm from "./components/ResetPasswordForm";
+import WalletPage from "./pages/WalletPage";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<AuthPage />} />
+        <Route path="/" element={<WalletPage />} />
         <Route path="/main" element={<MainPage />} />
+        <Route path="/wallet" element={<WalletPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
         <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
         <Route path="*" element={<Navigate to="/" />} />
