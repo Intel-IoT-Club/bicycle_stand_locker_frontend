@@ -4,13 +4,16 @@ import Homepage from "./pages/HomePage";
 import RideSummary from "./pages/RideSummary";
 import MyRides from "./pages/MyRides";
 import BikeUnlock from "./pages/BikeUnlock";
+import RideTracking from "./pages/RideTracking";
 
 function App() {
   return (
     <>
-      {/* <Homepage/> */}
-      {/* <MyRides/> */}
+      {/* <Homepage/>
       <BikeUnlock/>
+      <RideTracking/>
+      <RideSummary/>
+      <MyRides/> */}
       <Router>
         <Routes>
           <Route path="/" element={<AuthPage />} />
@@ -18,6 +21,8 @@ function App() {
           <Route path="/signup" element={<AuthPage />} />
           <Route path="/home" element={<Homepage />} />
           <Route path="/ride-summary" element={<RideSummary />} />
+          <Route path="/ride-select" element={<BikeUnlock />} />
+          <Route path="/ride-tracking" element={<RideTracking />} />
         </Routes>
       </Router>
     </>
