@@ -23,6 +23,14 @@ const destinationIcon = new L.Icon({
   iconSize: [35, 35],
 });
 
+
+const formatDistance = (km) => {
+  if (!km && km !== 0) return "N/A"; // handle undefined/null
+  const num = typeof km === "string" ? parseFloat(km) : km;
+  if (num < 1) return `${Math.round(num * 1000)} m`;
+  return `${num.toFixed(2)} km`;
+};
+
 // Fit map to boarding, destination, and selected bike
 const FitBounds = ({ boarding, destination, selectedBike }) => {
   const map = useMap();
@@ -77,7 +85,7 @@ const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, 
               Type: {bike.type}<br />
               Status: {bike.status}<br/>
               {bike._id === selectedBikeId && (
-                <span>Distance from you: {bikeDistance ? `${bikeDistance} km` : "Loading..."}</span>
+                <span>Distance from you: {bikeDistance ? `${formatDistance(bike.distanceKm)}` : "Loading..."}</span>
               )}
             </div>
           </Popup>

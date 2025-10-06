@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 
-const NearbyBikes = [
+const demoNearbyBikes = [
   {
     time: "01:23PM",
     duration: "5 min",
@@ -56,6 +56,26 @@ const NearbyBikes = [
   },
 ]
 
+const formatTime = (minutes) => {
+  if (minutes < 60) return `${minutes} min`;
+  const hrs = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  return `${hrs} hr ${mins} min`;
+};    
+
+const formatDistance = (km) => {
+  if (!km && km !== 0) return "N/A"; // handle undefined/null
+  const num = typeof km === "string" ? parseFloat(km) : km;
+  if (num < 1) return `${Math.round(num * 1000)} m`;
+  return `${num.toFixed(2)} km`;
+};
+
+const calculatePrice = (distanceKm, type) => {
+  let baseFare = 10;
+  let perKm = type === "Geared" ? 12 : 10;
+  return (baseFare + distanceKm * perKm).toFixed(2);
+};
+
 
 const BikeUnlock=()=>{
   const location = useLocation();
@@ -66,8 +86,7 @@ const BikeUnlock=()=>{
   const [routeCoords, setRouteCoords] = useState([]);
   const [bikeDistance, setBikeDistance] = useState(null);
   const [totalTime, setTotalTime] = useState(null);
-
-  const mapkey = import.meta.env.VITE_MAP_ACCESS_TOKEN;
+  const [totalDist, setTotalDist] = useState(null);
 
   const handleSelectBike = async (bike) => {
     setSelectedBikeId(bike._id);
@@ -75,33 +94,22 @@ const BikeUnlock=()=>{
     if (!boarding || !destination) return;
 
     try {
-      // Boarding -> Bike
-      const res1 = await axios.get(`https://us1.locationiq.com/v1/directions/driving/${boarding.lng},${boarding.lat};${bike.location.coordinates[0]},${bike.location.coordinates[1]}?key=${mapkey}&overview=full&geometries=geojson`);
-      const routeToBike = res1.data.routes[0].geometry.coordinates;
-      const dist1 = res1.data.routes[0].distance / 1000; // km
-      const dur1 = res1.data.routes[0].duration / 60; // min
+      const res = await axios.post("http://localhost:3000/api/cycles/ride-route", {
+        boarding,
+        bike,
+        destination
+      });
 
-      // Bike -> Destination
-      const res2 = await axios.get(`https://us1.locationiq.com/v1/directions/driving/${bike.location.coordinates[0]},${bike.location.coordinates[1]};${destination.lng},${destination.lat}?key=${mapkey}&overview=full&geometries=geojson`);
-      const routeToDest = res2.data.routes[0].geometry.coordinates;
-      const dist2 = res2.data.routes[0].distance / 1000;
-      const dur2 = res2.data.routes[0].duration / 60;
+      const { geometry, distanceKm, durationMin } = res.data;
+      setTotalDist(distanceKm);
+      setRouteCoords(geometry);
+      setTotalTime(durationMin);
 
-      setRouteCoords([...routeToBike, ...routeToDest]);
-
-      // Save distances/time
-      setBikeDistance(dist1.toFixed(2));
-      setTotalTime(Math.round(dur1 + dur2));
+      setBikeDistance(bike.distanceKm); //use bike.distancekm which we fetched while matrix api, above routing request result has distancekm is total trip distance
+      
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const formatTime = (minutes) => {
-    if (minutes < 60) return `${minutes} min`;
-    const hrs = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
-    return `${hrs} hr ${mins} min`;
   };
 
   useEffect(() => {
@@ -140,7 +148,7 @@ const BikeUnlock=()=>{
             />
           </div>
 
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto px-6">
               <div className="bg-black text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">Bicycle Found Near You</div>
               <div className="flex">
                   <div className="bg-[#016766] text-white flex flex-1 justify-center text-3xl border">Sort By</div>
@@ -150,32 +158,37 @@ const BikeUnlock=()=>{
                 Choose A Ride
                 {totalTime && (
                   <div className="text-xl mb-3 text-[#016766] font-semibold">
-                    🚴 Estimated Total Ride Time: {formatTime(totalTime)}
+                    🚴 Estimated Total Ride Time: {formatTime(totalTime)} | Total distance: {formatDistance(totalDist)}
                   </div>
                 )}
               </div>
-              
-              
-                      {cycles.map((bike)=>(
-                  <div className="bg-white border flex h-auto w-full px-6 gap-5" key={bike._id} onClick={() => handleSelectBike(bike)}>
-                      <div className="flex-1 "><img src={Thumbnail} alt="Bicycle-Thumbnail"/></div>
-                      <div className="flex-2 border bg-[#F9F8E9] my-7.5 rounded-xl flex">
-                          <div className="flex-3 ">
-                              <div className="text-4xl font-semibold">{new Date(bike.lastSeen).toLocaleString("en-IN", {day: "2-digit",month: "2-digit",year: "numeric",hour: "2-digit",minute: "2-digit"})} | 68 min</div>
-                              <div className="text-2xl font-semibold">{bike.cycleName}</div>
-                              <div className="text-xl ">{bike.type}</div>
-                              
-                          </div>
-                          <div className="flex-2 text-white font-semibold">
-                              <div className="bg-black w-auto rounded-sm w-max text-2xl px-4 py-2 relative translate-x-1/4 translate-y-1/4">68₹
-                                    <div className="bg-[#016766] rounded-sm w-max text-2xl  px-4 py-2 absolute">Start Ride</div>
-                              </div>
-                              
-                          </div>
-                      </div>
+              {cycles.map((bike)=>{
+              const isSelected = selectedBikeId === bike._id;
 
-                  </div>         
-              ))}
+              return(
+              <div
+                key={bike._id}
+                onClick={() => handleSelectBike(bike)}
+                className={`relative flex items-center gap-5 px-5 my-3 bg-white border-2 rounded-xl cursor-pointer transition-all duration-300 ease-in-out
+                  ${isSelected ? "border-[#016766] scale-[1.01] shadow-lg shadow-[#016766]/50  hover:scale-[1.02]" : "border-gray-300  hover:scale-[1.02]"}`}
+              >
+                <div className="flex-1 "><img src={Thumbnail} alt="Bicycle-Thumbnail"/></div>
+                <div className="flex-2 border bg-[#F9F8E9] my-1 p-2 rounded-xl flex flex-row justify-between h-max">
+                  <div className="flex-3 ">
+                    <div className="text-3xl font-semibold">{bike.cycleName} | {formatTime(bike.etaMinutes)}</div>
+                    <div className="text-2xl font-semibold">{bike.type}</div>
+                    <div className="text-xl ">{new Date(bike.lastSeen).toLocaleString("en-IN", {day: "2-digit",month: "2-digit",year: "numeric",hour: "2-digit",minute: "2-digit"})} </div>                   
+                  </div>
+                  <div className="flex-2 text-white font-semibold">
+                    <div className="bg-black w-auto rounded-sm w-max text-2xl px-4 py-2 relative translate-x-2/4 translate-y-1/8">
+                      {calculatePrice(bike.distanceKm, bike.etaMinutes, bike.type)}₹
+                      <div className="bg-[#016766] rounded-sm w-max text-2xl  px-4 py-2 absolute">Start Ride</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              );        
+              })}
               </div>
             
         </div>
