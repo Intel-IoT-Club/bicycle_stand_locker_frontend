@@ -2,59 +2,8 @@ import Thumbnail from "../assets/Mockup-Bicycle.png"
 import Dropdown from "../components/BikeUnlock/DropDown"
 import MapView from "../components/MapView";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-
-const demoNearbyBikes = [
-  {
-    time: "01:23PM",
-    duration: "5 min",
-    bike_name: "Trek Domane AL 2",
-    type: "Non-Geared",
-    price: "₹30.03",
-    button: "Start Ride",
-  },
-  {
-    time: "01:21PM",
-    duration: "10 min",
-    bike_name: "Mach City iBike",
-    type: "Geared",
-    price: "₹45.73",
-    button: "Start Ride",
-  },
-  {
-    time: "01:31PM",
-    duration: "10 min",
-    bike_name: "Hero Lectro C5",
-    type: "Non-Geared",
-    price: "₹50.21",
-    button: "Start Ride",
-  },
-  {
-    time: "01:40PM",
-    duration: "15 min",
-    bike_name: "Btwin Rockrider 340",
-    type: "Geared",
-    price: "₹65.10",
-    button: "Start Ride",
-  },
-  {
-    time: "01:55PM",
-    duration: "7 min",
-    bike_name: "Firefox Rapide",
-    type: "Non-Geared",
-    price: "₹28.45",
-    button: "Start Ride",
-  },
-  {
-    time: "02:05PM",
-    duration: "20 min",
-    bike_name: "Giant Escape 3",
-    type: "Geared",
-    price: "₹82.30",
-    button: "Start Ride",
-  },
-]
 
 const formatTime = (minutes) => {
   if (minutes < 60) return `${minutes} min`;
@@ -87,6 +36,7 @@ const BikeUnlock=()=>{
   const [bikeDistance, setBikeDistance] = useState(null);
   const [totalTime, setTotalTime] = useState(null);
   const [totalDist, setTotalDist] = useState(null);
+  const navigate = useNavigate();
 
   const handleSelectBike = async (bike) => {
     setSelectedBikeId(bike._id);
@@ -100,17 +50,28 @@ const BikeUnlock=()=>{
         destination
       });
 
-      const { geometry, distanceKm, durationMin } = res.data;
-      setTotalDist(distanceKm);
+      const { geometry } = res.data;
+      setTotalDist(bike.totalDistanceKm);
       setRouteCoords(geometry);
-      setTotalTime(durationMin);
+      setTotalTime(bike.totalTimeMinutes);
 
-      setBikeDistance(bike.distanceKm); //use bike.distancekm which we fetched while matrix api, above routing request result has distancekm is total trip distance
+      setBikeDistance(bike.walkDistanceKm);
       
     } catch (err) {
       console.error(err);
     }
   };
+
+  const handleStartRide = (bike) => {
+    navigate(`/ride-start`, {
+      state: {
+        boarding,
+        destination,
+        bike, // send full object to next page
+      },
+    });
+  };
+
 
   useEffect(() => {
 
@@ -158,7 +119,7 @@ const BikeUnlock=()=>{
                 Choose A Ride
                 {totalTime && (
                   <div className="text-xl mb-3 text-[#016766] font-semibold">
-                    🚴 Estimated Total Ride Time: {formatTime(totalTime)} | Total distance: {formatDistance(totalDist)}
+                    Estimated Total Ride Time: {formatTime(totalTime)} | Total distance: {formatDistance(totalDist)}
                   </div>
                 )}
               </div>
@@ -175,14 +136,22 @@ const BikeUnlock=()=>{
                 <div className="flex-1 "><img src={Thumbnail} alt="Bicycle-Thumbnail"/></div>
                 <div className="flex-2 border bg-[#F9F8E9] my-1 p-2 rounded-xl flex flex-row justify-between h-max">
                   <div className="flex-3 ">
-                    <div className="text-3xl font-semibold">{bike.cycleName} | {formatTime(bike.etaMinutes)}</div>
+                    <div className="text-3xl font-semibold">{bike.cycleName} | {formatTime(bike.walkEtaMinutes)}</div>
                     <div className="text-2xl font-semibold">{bike.type}</div>
                     <div className="text-xl ">{new Date(bike.lastSeen).toLocaleString("en-IN", {day: "2-digit",month: "2-digit",year: "numeric",hour: "2-digit",minute: "2-digit"})} </div>                   
                   </div>
                   <div className="flex-2 text-white font-semibold">
                     <div className="bg-black w-auto rounded-sm w-max text-2xl px-4 py-2 relative translate-x-2/4 translate-y-1/8">
-                      {calculatePrice(bike.distanceKm, bike.etaMinutes, bike.type)}₹
-                      <div className="bg-[#016766] rounded-sm w-max text-2xl  px-4 py-2 absolute">Start Ride</div>
+                      {calculatePrice(bike.rideDistanceKm, bike.type)}₹
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartRide(bike);
+                        }}
+                        className="cursor-pointer bg-[#016766] rounded-sm w-max text-2xl px-4 py-2 absolute hover:bg-[#025b58] active:scale-95 transition-all"
+                      >
+                        Use Bike
+                      </button>
                     </div>
                   </div>
                 </div>

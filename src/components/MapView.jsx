@@ -85,7 +85,7 @@ const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, 
               Type: {bike.type}<br />
               Status: {bike.status}<br/>
               {bike._id === selectedBikeId && (
-                <span>Distance from you: {bikeDistance ? `${formatDistance(bike.distanceKm)}` : "Loading..."}</span>
+                <span>Distance from you: {bikeDistance ? `${formatDistance(bike.walkDistanceKm)}` : "Loading..."}</span>
               )}
             </div>
           </Popup>
