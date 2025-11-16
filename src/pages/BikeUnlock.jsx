@@ -6,57 +6,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const demoNearbyBikes = [
-  {
-    time: "01:23PM",
-    duration: "5 min",
-    bike_name: "Trek Domane AL 2",
-    type: "Non-Geared",
-    price: "₹30.03",
-    button: "Start Ride",
-  },
-  {
-    time: "01:21PM",
-    duration: "10 min",
-    bike_name: "Mach City iBike",
-    type: "Geared",
-    price: "₹45.73",
-    button: "Start Ride",
-  },
-  {
-    time: "01:31PM",
-    duration: "10 min",
-    bike_name: "Hero Lectro C5",
-    type: "Non-Geared",
-    price: "₹50.21",
-    button: "Start Ride",
-  },
-  {
-    time: "01:40PM",
-    duration: "15 min",
-    bike_name: "Btwin Rockrider 340",
-    type: "Geared",
-    price: "₹65.10",
-    button: "Start Ride",
-  },
-  {
-    time: "01:55PM",
-    duration: "7 min",
-    bike_name: "Firefox Rapide",
-    type: "Non-Geared",
-    price: "₹28.45",
-    button: "Start Ride",
-  },
-  {
-    time: "02:05PM",
-    duration: "20 min",
-    bike_name: "Giant Escape 3",
-    type: "Geared",
-    price: "₹82.30",
-    button: "Start Ride",
-  },
-]
-
 const formatTime = (minutes) => {
   if (minutes < 60) return `${Math.round(minutes)} min`;
   const hrs = Math.floor(minutes / 60);
@@ -76,13 +25,6 @@ const formatDistance = (km) => {
   if (num < 1) return `${Math.round(num * 1000)} m`;
   return `${num.toFixed(2)} km`;
 };
-
-const calculatePrice = (distanceKm, type) => {
-  let baseFare = 10;
-  let perKm = type === "Geared" ? 12 : 10;
-  return (baseFare + distanceKm * perKm).toFixed(2);
-};
-
 
 const BikeUnlock=()=>{
   const location = useLocation();
@@ -175,7 +117,16 @@ const BikeUnlock=()=>{
       .finally(() => setLoading(false));
   }, [boarding, destination]);
 
-  if (loading) return <div className="p-20 text-3xl">Loading rides near you...</div>;
+  if (loading) return (<>
+    <div className="min-h-screen bg-[#F9F8E9]">
+        <div className="text-4xl  absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex">
+            <div className="mr-2">Loading rides near you</div>
+            <div className="animate-bounce">.</div>
+            <div className="animate-bounce delay-100">.</div>
+            <div className="animate-bounce delay-200">.</div>
+       </div>;
+    </div>
+  </>)
 
   return(
       <>

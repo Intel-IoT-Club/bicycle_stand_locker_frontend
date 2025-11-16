@@ -5,19 +5,19 @@ import Thumbnail from "../assets/Mockup-Bicycle.png";
 import axios from "axios";
 
 const formatTime = (minutes) => {
-  if (!minutes && minutes !== 0) return "N/A";
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return `${Math.round(minutes)} min`;
   const hrs = Math.floor(minutes / 60);
   const mins = Math.round(minutes % 60);
   return `${hrs} hr ${mins} min`;
-};
+};    
 
 const formatDistance = (km) => {
-  if (!km && km !== 0) return "N/A";
+  if (!km && km !== 0) return "N/A"; // handle undefined/null
   const num = typeof km === "string" ? parseFloat(km) : km;
   if (num < 1) return `${Math.round(num * 1000)} m`;
   return `${num.toFixed(2)} km`;
 };
+
 
 const calculatePrice = (distanceKm, type) => {
   let baseFare = 10;
@@ -268,8 +268,18 @@ const RideStart = () => {
     );
   }
 
-  if (loading) return <div className="p-20 text-3xl">Loading trip details...</div>;
-
+  if (loading) return (<>
+    <div className="min-h-screen bg-[#F9F8E9]">
+        <div className="text-4xl  absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex">
+            <div className="mr-2"> Loading trip details</div>
+            <div className="animate-bounce">.</div>
+            <div className="animate-bounce delay-100">.</div>
+            <div className="animate-bounce delay-200">.</div>
+       </div>;
+    </div>
+  </>)
+  
+  
   return (
     <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
       <div className="flex-1 border bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
@@ -289,7 +299,7 @@ const RideStart = () => {
           Start Ride
         </div>
 
-        {/* Bike overview */}
+      
         <div className="bg-white p-6 rounded-b-xl border-2 border-gray-300 mt-4">
           <div className="flex flex-row justify-evenly ">
             <div className="flex gap-4 items-center">
@@ -298,32 +308,12 @@ const RideStart = () => {
                 alt="Bike Thumb"
                 className="w-32 h-20 object-contain"
               />
-              <div>
-                <div className="text-4xl font-semibold">
-                  {bike?.cycleName || "Unknown Bike"}
-                </div>
-                <div className="text-3xl text-gray-700">
-                  {bike?.type || "—"}
-                </div>
-                <div className="text-xl text-gray-500">
-                  Last seen:{" "}
-                  {bike?.lastSeen
-                    ? new Date(bike.lastSeen).toLocaleString("en-IN", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "—"}
-                </div>
-              </div>
+              
             </div>
 
             <div className="mt-6 ml-12 grid grid-cols-2 gap-8">
               <div>
                 <div className="text-xl text-gray-500">Estimated trip time</div>
-                {/* NOTE: totalTime comes from the routing API (boarding -> bike -> destination total) */}
                 <div className="text-3xl font-semibold">
                   {formatTime(totalTime ?? totalTime)}
                 </div>
@@ -343,13 +333,13 @@ const RideStart = () => {
             <div>Time to reach Bicycle: {formatTime(bike?.walkEtaMinutes)}</div>
           </div>
           <div className="flex justify-center mt-2 text-2xl text-gray-1200">
-            <div>
+            <div className="bg-[#016766] p-2 rounded-sm text-white">
               Pay after Finishing Ride (Est. ₹{" "}
               {calculatePrice(bike?.rideDistanceKm, bike.type)})
             </div>
           </div>
           <div className="mt-4 bg-white p-2 rounded-xl border-2 border-gray-300 text-center text-lg text-gray-700">
-            <div className="text-2xl font-semibold">Ride Rules&Penalties</div>
+            <div className="text-2xl font-semibold">Ride Rules & Penalties</div>
             <p>Damage or loss of cycle may result in penalty charges.</p>
             <p>Parking outside authorized zone incurs ₹50 fine.</p>
           </div>
@@ -357,11 +347,11 @@ const RideStart = () => {
         </div>
 
         <div className="mt-6 bg-white p-6 rounded-xl border-2 border-gray-300">
-          <div className="text-center text-3xl text-gray-1200 mb-4">
-            Go to Bicycle to start Ride
-            <div className="text-2 xl text-gray-600">
+          <div className="text-center text-2xl text-gray-1200 mb-4">
+            <span className="font-bold">Go to Bicycle to start Ride</span>
+            <div className="text-gray-600">
               {" "}
-              (You should be at minimum of 2 meters distance closer to Bicycle to
+              (Note: You should be at minimum of 2 meters distance closer to Bicycle to
               Unlock and start ride){" "}
             </div>
             <div>Walk {} more meters to unlock</div>
