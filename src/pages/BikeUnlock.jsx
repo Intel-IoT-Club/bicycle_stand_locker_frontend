@@ -2,7 +2,7 @@ import Thumbnail from "../assets/Mockup-Bicycle.png"
 import Dropdown from "../components/BikeUnlock/DropDown"
 import MapView from "../components/MapView";
 import { useState, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -94,6 +94,7 @@ const BikeUnlock=()=>{
   const [bikeDistance, setBikeDistance] = useState(null);
   const [totalTime, setTotalTime] = useState(null);
   const [totalDist, setTotalDist] = useState(null);
+  const navigate = useNavigate();
 
 
   const SORT_LABELS=["Total time","walk time", "ride time"]
@@ -132,17 +133,28 @@ const BikeUnlock=()=>{
         destination
       });
 
-      const { geometry, distanceKm, durationMin } = res.data;
-      setTotalDist(distanceKm);
+      const { geometry } = res.data;
+      setTotalDist(bike.totalDistanceKm);
       setRouteCoords(geometry);
-      setTotalTime(durationMin);
+      setTotalTime(bike.totalTimeMinutes);
 
-      setBikeDistance(bike.distanceKm); //use bike.distancekm which we fetched while matrix api, above routing request result has distancekm is total trip distance
+      setBikeDistance(bike.walkDistanceKm);
       
     } catch (err) {
       console.error(err);
     }
   };
+
+  const handleStartRide = (bike) => {
+    navigate(`/ride-start`, {
+      state: {
+        boarding,
+        destination,
+        bike, // send full object to next page
+      },
+    });
+  };
+
 
   useEffect(() => {
 
@@ -268,7 +280,10 @@ const BikeUnlock=()=>{
                           <div className="text-lg">{bike.totalDistanceKm}km</div>
                           </div>
 
-                        <div className="bg-black text-white text-lg p-2 rounded-sm">Book Ride</div>
+                        <div className="bg-black text-white text-lg p-2 rounded-sm" onClick={(e) => {
+                          e.stopPropagation();
+                          handleStartRide(bike);
+                        }}>Book Ride</div>
                     
                       </div>
                   
