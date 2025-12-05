@@ -3,19 +3,17 @@ import AuthPage from "./pages/AuthPage";
 import Homepage from "./pages/HomePage";
 import RideSummary from "./pages/RideSummary";
 import MyRides from "./pages/MyRides";
+import { AuthProvider } from "./components/Contexts/authContext";
 import BikeUnlock from "./pages/BikeUnlock";
 import RideTracking from "./pages/RideTracking";
 import RideStart from "./pages/RideStart";
 
+
 function App() {
   return (
     <>
-      {/* <Homepage/>
-      <BikeUnlock/>
-      <RideTracking/>
-      <RideSummary/>
-      <MyRides/> */}
       <Router>
+        <AuthProvider>
         <Routes>
           <Route path="/" element={<AuthPage />} />
           <Route path="/login" element={<AuthPage />} />
@@ -27,6 +25,7 @@ function App() {
           <Route path="/ride-tracking" element={<RideTracking />} />
 
         </Routes>
+        </AuthProvider>
       </Router>
     </>
   );
