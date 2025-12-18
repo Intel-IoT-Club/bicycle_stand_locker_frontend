@@ -68,10 +68,13 @@ const Home = () => {
               <img src={SearchIcon} className="h-8 w-8" />
               <input
                 type="text"
+                name="boarding_point"
+                autoComplete="on"
                 placeholder="Enter Boarding Point"
                 value={boarding}
                 onChange={(e) => setBoarding(e.target.value)}
                 className="bg-transparent outline-none text-xl flex-1"
+                aria-label="Boarding Point"
               />
             </div>
 
@@ -80,10 +83,13 @@ const Home = () => {
               <img src={SearchIcon} className="h-8 w-8" />
               <input
                 type="text"
+                name="destination_point"
+                autoComplete="on"
                 placeholder="Enter Destination Point"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 className="bg-transparent outline-none text-xl flex-1"
+                aria-label="Destination Point"
               />
             </div>
 

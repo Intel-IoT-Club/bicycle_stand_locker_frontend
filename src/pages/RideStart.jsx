@@ -3,26 +3,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 import MapView from "../components/MapView";
 import Thumbnail from "../assets/Mockup-Bicycle.png";
 import axios from "axios";
+import { useAuth } from "../components/Contexts/authContext";
 
 const formatTime = (minutes) => {
   if (minutes < 60) return `${Math.round(minutes)} min`;
   const hrs = Math.floor(minutes / 60);
   const mins = Math.round(minutes % 60);
   return `${hrs} hr ${mins} min`;
-};    
+};
 
 const formatDistance = (km) => {
   if (!km && km !== 0) return "N/A"; // handle undefined/null
   const num = typeof km === "string" ? parseFloat(km) : km;
   if (num < 1) return `${Math.round(num * 1000)} m`;
   return `${num.toFixed(2)} km`;
-};
-
-
-const calculatePrice = (distanceKm, type) => {
-  let baseFare = 10;
-  let perKm = type === "Geared" ? 12 : 10;
-  return (baseFare + distanceKm * perKm).toFixed(2);
 };
 
 // Returns distance between two lat/lng points in meters
@@ -36,9 +30,9 @@ const distanceMeters = (lat1, lon1, lat2, lon2) => {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c; // meters
@@ -67,6 +61,8 @@ const getUserLocation = () => {
 const RideStart = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { token } = useAuth();
+
   const { bike: passedBike, boarding, destination } = location.state || {};
   const [bike, setBike] = useState(passedBike || null);
   const [loading, setLoading] = useState(true);
@@ -75,9 +71,8 @@ const RideStart = () => {
   const [totalTime, setTotalTime] = useState(null);
 
   const [bikeDistance, setBikeDistance] = useState(bike?.walkDistanceKm ?? null);
-  const [bikeEtaMinutes, setBikeEtaMinutes] = useState(
-    bike?.walkEtaMinutes ?? null
-  );
+  const [bikeEtaMinutes, setBikeEtaMinutes] = useState(bike?.walkEtaMinutes ?? null);
+  const [EstimatedFare,setEstimatedFare] = useState();
 
   const [rideObj, setRideObj] = useState(null); // created ride from server
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -108,7 +103,7 @@ const RideStart = () => {
     try {
       const boardingPoint = {
         type: "Point",
-        coordinates: [boarding.lng, boarding.lat],
+        coordinates: [bike.location.coordinates[0], bike.location.coordinates[1]],
       };
 
       const destinationPoint = {
@@ -124,17 +119,21 @@ const RideStart = () => {
         payment: {
           paid: false, // IMPORTANT: keep false, user pays after ride
           method: "postpaid",
-          amount: Number(calculatePrice(bike.rideDistanceKm, bike.type)), // estimated fare; still unpaid
+          amount: Number(EstimatedFare), // estimated fare; still unpaid
           txnId: undefined, // defined after real payment
         },
-        riderId: "1234567", // real user id when auth exists
-        plannedDistanceKm: Number(totalDist),
-        plannedDurationMin: Number(totalTime),
+        plannedDistanceKm: Number(bikeDistance),
+        plannedDurationMin: Number(bikeEtaMinutes),
       };
 
       const rideRes = await axios.post(
         "http://localhost:3000/api/rides",
-        ridePayload
+        ridePayload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        },
       );
 
       const createdRide = rideRes.data.ride || rideRes.data;
@@ -189,9 +188,14 @@ const RideStart = () => {
         setIsUnlocking(false);
         return;
       }
-
+      
       const res = await axios.post(
-        `http://localhost:3000/api/rides/${rideToUse._id}/start`
+        `http://localhost:3000/api/rides/${rideToUse._id}/start`,{},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+        },
       );
       const updatedRide = res.data.ride || res.data;
 
@@ -202,7 +206,7 @@ const RideStart = () => {
       );
 
       alert("Ride started — bike unlocked. Have a safe ride!");
-      navigate(`/ride-tracking`);
+      navigate(`/ride-tracking`, { state: { ride: updatedRide, bike } });
     } catch (err) {
       console.error("Failed to start ride:", err.response?.data || err.message);
       const status = err.response?.status;
@@ -234,13 +238,20 @@ const RideStart = () => {
           }
         );
 
-        const { geometry} = res.data || {};
+        const { geometry } = res.data || {};
 
         setRouteCoords(geometry || []);
         setTotalDist(bike.totalDistanceKm);
         setTotalTime(bike.totalTimeMinutes);
         setBikeDistance(bike.walkDistanceKm ?? bikeDistance);
         setBikeEtaMinutes(bike.walkEtaMinutes ?? bikeEtaMinutes);
+        const fareRes = await axios.post("http://localhost:3000/api/fare", {
+          distanceKm: bike.walkDistanceKm,
+          bikeType: bike.type,
+          durationMinutes: bike.walkEtaMinutes,
+        });
+        setEstimatedFare(fareRes.data.fare);
+        console.log("Estimated fare:", fareRes.data.fare);
       } catch (err) {
         console.error("Failed to fetch ride-route:", err);
       } finally {
@@ -270,16 +281,16 @@ const RideStart = () => {
 
   if (loading) return (<>
     <div className="min-h-screen bg-[#F9F8E9]">
-        <div className="text-4xl  absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex">
-            <div className="mr-2"> Loading trip details</div>
-            <div className="animate-bounce">.</div>
-            <div className="animate-bounce delay-100">.</div>
-            <div className="animate-bounce delay-200">.</div>
-       </div>;
+      <div className="text-4xl  absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex">
+        <div className="mr-2"> Loading trip details</div>
+        <div className="animate-bounce">.</div>
+        <div className="animate-bounce delay-100">.</div>
+        <div className="animate-bounce delay-200">.</div>
+      </div>;
     </div>
   </>)
-  
-  
+
+
   return (
     <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
       <div className="flex-1 border bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
@@ -288,7 +299,7 @@ const RideStart = () => {
           destination={destination}
           cycles={bike ? [bike] : []}
           selectedBikeId={bike?._id}
-          onSelectBike={() => {}}
+          onSelectBike={() => { }}
           routeCoords={routeCoords}
           bikeDistance={bikeDistance}
         />
@@ -299,7 +310,7 @@ const RideStart = () => {
           Start Ride
         </div>
 
-      
+
         <div className="bg-white p-6 rounded-b-xl border-2 border-gray-300 mt-4">
           <div className="flex flex-row justify-evenly ">
             <div className="flex gap-4 items-center">
@@ -308,7 +319,7 @@ const RideStart = () => {
                 alt="Bike Thumb"
                 className="w-32 h-20 object-contain"
               />
-              
+
             </div>
 
             <div className="mt-6 ml-12 grid grid-cols-2 gap-8">
@@ -335,7 +346,7 @@ const RideStart = () => {
           <div className="flex justify-center mt-2 text-2xl text-gray-1200">
             <div className="bg-[#016766] p-2 rounded-sm text-white">
               Pay after Finishing Ride (Est. ₹{" "}
-              {calculatePrice(bike?.rideDistanceKm, bike.type)})
+              {EstimatedFare})
             </div>
           </div>
           <div className="mt-4 bg-white p-2 rounded-xl border-2 border-gray-300 text-center text-lg text-gray-700">
@@ -354,7 +365,7 @@ const RideStart = () => {
               (Note: You should be at minimum of 2 meters distance closer to Bicycle to
               Unlock and start ride){" "}
             </div>
-            <div>Walk {} more meters to unlock</div>
+            <div>Walk {Math.round(bike.walkDistanceKm * 1000)} more meters to unlock</div>
           </div>
 
           <button
