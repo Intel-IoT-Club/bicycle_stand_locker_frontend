@@ -13,7 +13,7 @@ const Home = () => {
   // Geocode place name -> coordinates
   const getCoordinates = async (place) => {
     try {
-      
+
       const res = await fetch(
         `https://us1.locationiq.com/v1/search?key=${mapkey}&q=${encodeURIComponent(
           place

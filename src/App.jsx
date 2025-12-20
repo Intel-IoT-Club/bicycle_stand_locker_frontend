@@ -14,17 +14,17 @@ function App() {
     <>
       <Router>
         <AuthProvider>
-        <Routes>
-          <Route path="/" element={<AuthPage />} />
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/signup" element={<AuthPage />} />
-          <Route path="/home" element={<Homepage />} />
-          <Route path="/ride-summary" element={<RideSummary />} />
-          <Route path="/ride-select" element={<BikeUnlock />} />
-          <Route path="/ride-start" element={<RideStart />} />
-          <Route path="/ride-tracking" element={<RideTracking />} />
+          <Routes>
+            <Route path="/" element={<AuthPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/signup" element={<AuthPage />} />
+            <Route path="/home" element={<Homepage />} />
+            <Route path="/ride-summary/:id" element={<RideSummary />} />
+            <Route path="/ride-select" element={<BikeUnlock />} />
+            <Route path="/ride-start" element={<RideStart />} />
+            <Route path="/ride-tracking" element={<RideTracking />} />
 
-        </Routes>
+          </Routes>
         </AuthProvider>
       </Router>
     </>

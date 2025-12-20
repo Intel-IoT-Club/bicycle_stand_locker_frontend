@@ -2,6 +2,8 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import MapView from "../components/MapView";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
 const SIMULATE_RIDE = true; // set false in production
 import { useAuth } from "../components/Contexts/authContext";
@@ -9,6 +11,7 @@ import { useAuth } from "../components/Contexts/authContext";
 const RideTracking = () => {
   const { state } = useLocation();
   const { ride, bike } = state || {};
+  const navigate = useNavigate();
   const { token } = useAuth();
   /* ---------------- UI STATE ---------------- */
   const [showPaymentSummary, setShowPaymentSummary] = useState(false);
@@ -23,7 +26,7 @@ const RideTracking = () => {
   const [livePrice, setLivePrice] = useState(ride?.payment?.amount || 0);
   const [rideEnded, setRideEnded] = useState(false);
 
-  const canEndRide = distanceLeft < 0.2; // 200 meters
+  const canEndRide = distanceLeft < 1; // 200 meters
 
   /* ---------------- FALLBACK DATA (UNCHANGED) ---------------- */
   const bikeId = ride?.bikeId || bike?._id || "N/A";
@@ -229,7 +232,7 @@ const RideTracking = () => {
 
   /* ---------------- END RIDE ---------------- */
   const handleEndRide = async () => {
-    
+
     try {
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/rides/${ride._id}/end`,
@@ -244,7 +247,6 @@ const RideTracking = () => {
           },
         }
       );
-
       // LOCK final price returned by backend
       if (res.data?.finalFare) {
         setLivePrice(res.data.finalFare);
@@ -266,18 +268,37 @@ const RideTracking = () => {
     );
 
     const { order } = response.data;
+    console.log("order: " + order);
 
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
       amount: order.amount,
       currency: "INR",
       order_id: order.id,
+
       handler: async (response) => {
-        await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/payments/verifyPay`,
-          response
-        );
+        try {
+          // 2️⃣ Verify payment + update ride
+          const verifyRes = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/api/payments/verifyPay`,
+            {
+              response,
+              ride
+            }
+          );
+
+          // 3️⃣ Redirect ONLY after backend success
+          if (verifyRes.data.success) {
+            const id = ride._id;
+            navigate(`/ride-summary/${id}`);
+          }
+
+        } catch (err) {
+          console.error("Payment verification failed:", err);
+          alert("Payment verification failed. Please contact support.");
+        }
       },
+
       theme: { color: "#3399cc" },
     };
 
@@ -307,12 +328,12 @@ const RideTracking = () => {
           <MapView
             boarding={boardingLoc}
             destination={destinationLoc}
-            cycles={currentLocation ? [{ ...bike, location: {coordinates:[currentLocation.lng,currentLocation.lat]} }] : [bike]}
+            cycles={currentLocation ? [{ ...bike, location: { coordinates: [currentLocation.lng, currentLocation.lat] } }] : [bike]}
             selectedBikeId={bike?._id}
-            onSelectBike={() => {}}
+            onSelectBike={() => { }}
             routeCoords={routeCoords}
             bikeDistance={null}
-            //currentLocation={currentLocation}
+          //currentLocation={currentLocation}
           />
         </div>
 
