@@ -1,5 +1,5 @@
 import React from 'react';
-import bicycleIcon from '../../assets/icon.png'; // Ensure this path is correct
+import bicycleIcon from '../assets/icon.png'; // Ensure this path is correct
 
 function Header({ userName, onNotificationClick, onProfileClick, className }) {
     return (
