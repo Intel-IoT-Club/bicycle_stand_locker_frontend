@@ -22,7 +22,6 @@ export const AuthProvider = ({ children }) => {
           }
 
           // Fetch full user profile from backend
-          console.log(decoded);
           const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -60,7 +59,6 @@ export const AuthProvider = ({ children }) => {
         } else {
           // fallback: fetch user
           try {
-            console.log("is it so")
             const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/auth/me`, {
               headers: {
                 Authorization: `Bearer ${token}`,

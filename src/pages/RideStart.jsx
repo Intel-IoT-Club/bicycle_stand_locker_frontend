@@ -86,7 +86,6 @@ const RideStart = () => {
       const bikeLat = bike.location.coordinates[1];
 
       const dist = distanceMeters(userPos.lat, userPos.lng, bikeLat, bikeLng);
-      console.log("User → Bike distance:", dist, "meters");
 
       // 2 meters threshold
       return dist <= 20000;
@@ -251,7 +250,6 @@ const RideStart = () => {
           durationMinutes: bike.walkEtaMinutes,
         });
         setEstimatedFare(fareRes.data.fare);
-        console.log("Estimated fare:", fareRes.data.fare);
       } catch (err) {
         console.error("Failed to fetch ride-route:", err);
       } finally {

@@ -47,7 +47,6 @@ const Home = () => {
       return;
     }
 
-    console.log({ boarding: boardingCoords, destination: destinationCoords });
 
     // Navigate to ride-select page with coordinates
     navigate("/ride-select", {

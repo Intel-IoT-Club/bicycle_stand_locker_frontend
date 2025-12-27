@@ -6,7 +6,6 @@ import MapView from "../components/MapView";
 const RideTracking = () => {
   const { state } = useLocation();
   const { ride, bike } = state || {};
-  console.log(bike);
 
   /* ------------------ STATE ------------------ */
   const [currentLocation, setCurrentLocation] = useState(null);
@@ -84,7 +83,6 @@ const RideTracking = () => {
       if (!boardingLoc || !destinationLoc) return;
 
       try {
-        console.log(boardingLoc, destinationLoc);
 
         const res = await axios.post(
           "http://localhost:3000/api/cycles/ride-route",

@@ -120,7 +120,6 @@ const BikeUnlock = () => {
 
     axios.post("http://localhost:3000/api/cycles/search", { boarding, destination })
       .then((res) => {
-        console.log("Fetched cycles:", res.data.cycles);
         setCycles(res.data.cycles || [])
       })
       .catch((err) => {

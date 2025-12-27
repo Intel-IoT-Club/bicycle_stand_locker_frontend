@@ -146,7 +146,6 @@ const RideTracking = () => {
         `${import.meta.env.VITE_API_BASE_URL}/api/cycles/${bike._id}/location`
       );
       setCurrentLocation(res.data.location);
-      console.log(res.data.location);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -190,7 +189,6 @@ const RideTracking = () => {
 
     setDistanceCovered((prev) => Math.max(prev, covered));
     setDistanceLeft(Math.max((ride?.plannedDistanceKm || 0) - covered, 0));
-    console.log(Math.max((ride?.plannedDistanceKm || 0) - covered, 0));
   }, [currentLocation, routeCoords]);
 
   /* ---------------- TIME ---------------- */
@@ -268,7 +266,6 @@ const RideTracking = () => {
     );
 
     const { order } = response.data;
-    console.log("order: " + order);
 
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,

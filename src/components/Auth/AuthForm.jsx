@@ -106,8 +106,6 @@ const AuthForm = () => {
         };
       }
 
-      console.log("Submitting payload:", payload);
-
       const res = await axios.post(endpoint, payload, {
         headers: { "Content-Type": "application/json" },
       });
@@ -118,7 +116,6 @@ const AuthForm = () => {
         login(data.token, data.user);
       }
 
-      console.log("Success:", data);
       navigate("/home");
       // optionally redirect: window.location.href = "/dashboard";
     } catch (error) {
