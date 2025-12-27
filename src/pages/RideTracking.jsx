@@ -156,7 +156,7 @@ const RideTracking = () => {
     if (!boardingLoc || !destinationLoc) return;
 
     axios
-      .post("http://localhost:3000/api/cycles/ride-route", {
+      .post(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/ride-route`, {
         boarding: boardingLoc,
         bike,
         destination: destinationLoc,
@@ -321,7 +321,7 @@ const RideTracking = () => {
 
       <div className="flex flex-row gap-5 w-full pr-20 pl-20">
 
-        <div className="flex-1 border bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+        <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
           <MapView
             boarding={boardingLoc}
             destination={destinationLoc}

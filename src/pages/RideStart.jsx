@@ -126,7 +126,7 @@ const RideStart = () => {
       };
 
       const rideRes = await axios.post(
-        "http://localhost:3000/api/rides",
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides`,
         ridePayload,
         {
           headers: {
@@ -189,7 +189,7 @@ const RideStart = () => {
       }
       
       const res = await axios.post(
-        `http://localhost:3000/api/rides/${rideToUse._id}/start`,{},
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideToUse._id}/start`,{},
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -229,7 +229,7 @@ const RideStart = () => {
       setLoading(true);
       try {
         const res = await axios.post(
-          "http://localhost:3000/api/cycles/ride-route",
+          `${import.meta.env.VITE_API_BASE_URL}/api/cycles/ride-route`,
           {
             boarding,
             bike,
@@ -244,7 +244,7 @@ const RideStart = () => {
         setTotalTime(bike.totalTimeMinutes);
         setBikeDistance(bike.walkDistanceKm ?? bikeDistance);
         setBikeEtaMinutes(bike.walkEtaMinutes ?? bikeEtaMinutes);
-        const fareRes = await axios.post("http://localhost:3000/api/fare", {
+        const fareRes = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/fare`, {
           distanceKm: bike.walkDistanceKm,
           bikeType: bike.type,
           durationMinutes: bike.walkEtaMinutes,
@@ -291,7 +291,7 @@ const RideStart = () => {
 
   return (
     <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
-      <div className="flex-1 border bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+      <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
         <MapView
           boarding={boarding}
           destination={destination}

@@ -112,7 +112,7 @@ const MyRides=()=>{
   const [cycles, setCycles] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/api/cycles/all")
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/all`)
       .then(res => setCycles(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -121,7 +121,7 @@ const MyRides=()=>{
         <Header/>
         <div className="min-h-screen bg-[#F9F8E9] pt-20 px-20 font-afacad m-0 ">
               <div className="text-7xl font-bold">My Rides</div>
-              <div className="grid grid-cols-8 text-[#016766] text-4xl font-semibold  flex items-center">
+              <div className="grid-cols-8 text-[#016766] text-4xl font-semibold  flex items-center">
                   <div className="p-2">S.no</div>
                   <div className="p-2">Date/Time</div> {/* Fix: P-2 should be p-2 */}
                   <div className="p-2">Cycle-ID</div>
@@ -133,7 +133,7 @@ const MyRides=()=>{
               </div>
 
               {cycles.map(ride => (
-              <div key={ride.cycleId} className="grid grid-cols-8  bg-white text-4xl flex items-center border m-4">
+              <div key={ride.cycleId} className="grid-cols-8  bg-white text-4xl flex items-center border m-4">
                   <div className="p-2">{ride.cycleId}</div>
                   <div className="p-2">{ride.lastSeen}</div>
                   <div className="p-2">{ride.cycleId}</div>

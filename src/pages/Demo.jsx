@@ -85,7 +85,7 @@ const RideTracking = () => {
       try {
 
         const res = await axios.post(
-          "http://localhost:3000/api/cycles/ride-route",
+          `${import.meta.env.VITE_API_BASE_URL}/api/cycles/ride-route`,
           {
             boarding: boardingLoc,
             bike: null, // better than {}
@@ -175,7 +175,7 @@ const RideTracking = () => {
   useEffect(() => {
     if (!offRouteSince || Date.now() - offRouteSince < 10000) return;
 
-    axios.post("http://localhost:3000/api/cycles/ride-route", {
+    axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/ride-route`, {
       boarding: currentLocation,
       destination: destinationLoc,
     }).then(res => setRouteCoords(res.data.geometry || []));

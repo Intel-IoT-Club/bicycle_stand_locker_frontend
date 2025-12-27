@@ -68,7 +68,7 @@ const BikeUnlock = () => {
     if (!boarding || !destination) return;
 
     try {
-      const res = await axios.post("http://localhost:3000/api/cycles/ride-route", {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/ride-route`, {
         boarding,
         bike,
         destination
@@ -118,7 +118,7 @@ const BikeUnlock = () => {
       return;
     }
 
-    axios.post("http://localhost:3000/api/cycles/search", { boarding, destination })
+    axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/search`, { boarding, destination })
       .then((res) => {
         setCycles(res.data.cycles || [])
       })
@@ -143,7 +143,7 @@ const BikeUnlock = () => {
   return (
     <>
       <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
-        <div className="flex-1 border bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+        <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
           <MapView
             boarding={boarding}
             destination={destination}
