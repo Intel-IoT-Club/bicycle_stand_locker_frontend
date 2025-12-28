@@ -1,6 +1,6 @@
 import { Card, CardBody } from '../ui/card.jsx';
 import React, { useEffect, useRef, useState } from "react";
-import Header from "../components/wallet/Header";
+
 import WalletBalance from "../components/wallet/WalletBalance";
 import TransactionList from "../components/wallet/TransactionList";
 import RechargeModal from "../components/wallet/RechargeModal";
@@ -232,11 +232,7 @@ export default function WalletPage() {
         <div className="min-h-screen bg-[#F9F8E9] font-afacad text-black">
             <div id="confetti-root"></div>
             
-            <Header 
-                userName={user?.name} 
-                onNotificationClick={() => setNotifOpen(true)} 
-                onProfileClick={() => alert("Profile page not implemented")} 
-            />
+            
             <ToastManager />
 
             <div className="max-w-6xl mx-auto p-4 flex items-center justify-between">
@@ -295,7 +291,7 @@ export default function WalletPage() {
             </main>
 
             {/* Mobile Bottom Nav */}
-            <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-auto sm:hidden z-50">
+            <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-auto z-50">
                 <div className="bg-black text-white rounded-full shadow-xl px-6 py-3 flex gap-6 border-2 border-[#016766]">
                     <NavLink to="/home" className={({isActive})=>`flex flex-col items-center ${isActive? 'text-[#016766]':'text-white'}`}>
                         <span className="text-xl">🏠</span>
