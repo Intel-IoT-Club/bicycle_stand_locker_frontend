@@ -7,6 +7,7 @@ import { AuthProvider } from "./components/Contexts/authContext";
 import BikeUnlock from "./pages/BikeUnlock";
 import RideTracking from "./pages/RideTracking";
 import RideStart from "./pages/RideStart";
+import WalletPage from "./pages/WalletPage";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
             <Route path="/ride-select" element={<BikeUnlock />} />
             <Route path="/ride-start" element={<RideStart />} />
             <Route path="/ride-tracking" element={<RideTracking />} />
+            <Route path="/wallet" element={<WalletPage />} />
 
           </Routes>
         </AuthProvider>
