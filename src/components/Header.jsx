@@ -1,5 +1,5 @@
 import React from 'react';
-import bicycleIcon from '../../assets/icon.png'; // Ensure this path is correct
+import bicycleIcon from '../assets/icon.png'; // Ensure this path is correct
 
 function Header({ userName, onNotificationClick, onProfileClick, className }) {
     return (
@@ -23,7 +23,10 @@ function Header({ userName, onNotificationClick, onProfileClick, className }) {
                 >
                     🔔
                 </button>
-                <div className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg border-2 border-black">
+                <div 
+                    onClick={onProfileClick}
+                    className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg border-2 border-black cursor-pointer"
+                >
                     {userName ? userName[0].toUpperCase() : 'U'}
                 </div>
             </div>
