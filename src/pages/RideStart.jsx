@@ -72,7 +72,7 @@ const RideStart = () => {
 
   const [bikeDistance, setBikeDistance] = useState(bike?.walkDistanceKm ?? null);
   const [bikeEtaMinutes, setBikeEtaMinutes] = useState(bike?.walkEtaMinutes ?? null);
-  const [EstimatedFare,setEstimatedFare] = useState();
+  const [EstimatedFare, setEstimatedFare] = useState();
 
   const [rideObj, setRideObj] = useState(null); // created ride from server
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -88,7 +88,7 @@ const RideStart = () => {
       const dist = distanceMeters(userPos.lat, userPos.lng, bikeLat, bikeLng);
 
       // 2 meters threshold
-      return dist <= 20000;
+      return dist <= 2;
     } catch (err) {
       console.error("GPS error:", err);
       return null; // unknown
@@ -187,9 +187,9 @@ const RideStart = () => {
         setIsUnlocking(false);
         return;
       }
-      
+
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideToUse._id}/start`,{},
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideToUse._id}/start`, {},
         {
           headers: {
             Authorization: `Bearer ${token}`

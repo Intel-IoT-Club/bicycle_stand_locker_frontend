@@ -31,7 +31,7 @@ const Home = () => {
   };
 
   const handleAbout = () => {
-    alert("About us clicked ");
+    document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSearch = async () => {
