@@ -25,6 +25,9 @@ const RideTracking = () => {
   const [timeLeftMin, setTimeLeftMin] = useState(null);
   const [livePrice, setLivePrice] = useState(ride?.payment?.amount || 0);
   const [rideEnded, setRideEnded] = useState(false);
+  const [wallet, setWallet] = useState(null);
+  const [pinInput, setPinInput] = useState("");
+  const [showPinModal, setShowPinModal] = useState(false);
 
   const canEndRide = distanceLeft < 1; // 200 meters
 
@@ -212,7 +215,6 @@ const RideTracking = () => {
     setTimeLeftMin((distanceLeft / effectiveSpeed) * 60);
   }, [rideTimeMin, distanceCovered, distanceLeft]);
 
-  /* ---------------- PRICE, Ride data Update (BACKEND AUTH) ---------------- */
   useEffect(() => {
     if (rideEnded) return;
     if (!ride?._id) return;
@@ -226,7 +228,21 @@ const RideTracking = () => {
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [distanceCovered, rideTimeMin]);
+  }, [distanceCovered, rideTimeMin, rideEnded]);
+
+  /* ---------------- FETCH WALLET ---------------- */
+  useEffect(() => {
+    if (!user?._id) return;
+    const fetchWallet = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`);
+        setWallet(res.data);
+      } catch (err) {
+        console.error("Failed to fetch wallet:", err);
+      }
+    };
+    fetchWallet();
+  }, [user?._id, showPaymentSummary]);
 
   /* ---------------- END RIDE ---------------- */
   const handleEndRide = async () => {
@@ -259,6 +275,32 @@ const RideTracking = () => {
   };
 
   /* ---------------- PAYMENT ---------------- */
+  const handleWalletPayment = async () => {
+    if (!wallet) return;
+    if (wallet.pin && !showPinModal) {
+      setShowPinModal(true);
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}/pay`,
+        {
+          amount: livePrice,
+          rideId: ride._id,
+          pin: pinInput
+        }
+      );
+
+      if (res.data.success) {
+        navigate(`/ride-summary/${ride._id}`);
+      }
+    } catch (err) {
+      console.error("Wallet payment failed:", err);
+      alert(err.response?.data?.message || "Wallet payment failed");
+    }
+  };
+
   const handlePayment = async () => {
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
@@ -351,12 +393,41 @@ const RideTracking = () => {
                 <div className="text-4xl font-bold mt-4">Amount: ₹{price}</div>
               </div>
 
-              <button
-                className="bg-green-600 hover:bg-green-700 text-white text-4xl font-bold px-36 py-6 rounded-lg"
-                onClick={handlePayment}
-              >
-                PAY NOW
-              </button>
+              <div className="flex w-full gap-4 px-20">
+                <button
+                  className={`flex-1 text-2xl font-bold py-4 rounded-xl transition-all border-2 border-black ${wallet?.balance >= livePrice ? "bg-[#016766] text-white hover:bg-[#015554]" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                  onClick={handleWalletPayment}
+                  disabled={wallet?.balance < livePrice}
+                >
+                  PAY WITH WALLET (₹{wallet?.balance?.toFixed(2) || "0"})
+                </button>
+
+                <button
+                  className="flex-1 bg-white text-black border-2 border-black hover:bg-gray-50 text-2xl font-bold py-4 rounded-xl"
+                  onClick={handlePayment}
+                >
+                  ONLINE PAYMENT
+                </button>
+              </div>
+
+              {showPinModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] font-afacad">
+                  <div className="bg-white p-8 rounded-2xl border-4 border-black w-80">
+                    <h3 className="text-2xl font-bold mb-4">Enter Wallet PIN</h3>
+                    <input
+                      type="password"
+                      maxLength={4}
+                      value={pinInput}
+                      onChange={(e) => setPinInput(e.target.value)}
+                      className="w-full text-center text-4xl tracking-widest border-2 border-gray-300 rounded-lg py-2 mb-6"
+                    />
+                    <div className="flex gap-4">
+                      <button onClick={() => setShowPinModal(false)} className="flex-1 font-bold py-2 rounded-lg border-2 border-black">Cancel</button>
+                      <button onClick={handleWalletPayment} className="flex-1 bg-black text-white font-bold py-2 rounded-lg">Confirm</button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>

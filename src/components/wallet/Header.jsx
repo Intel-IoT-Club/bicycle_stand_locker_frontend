@@ -1,6 +1,6 @@
 
 import React from 'react';
-import bicycleIcon from '../../assets/icon.png';
+import bicycleIcon from '../../assets/Mockup-Bicycle.png';
 
 function Header({ userName, onNotificationClick, onProfileClick, className }) {
     return (

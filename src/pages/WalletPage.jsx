@@ -9,6 +9,7 @@ import Modal from "../ui/Modal.jsx";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/Contexts/authContext";
 import ToastManager, { notify } from "../ui/toastManager";
+import WalletHeader from "../components/wallet/Header";
 
 const BACKEND = import.meta.env.VITE_API_BASE_URL;
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -63,6 +64,9 @@ export default function WalletPage() {
                 const data = await res.json();
                 setBalance(data.balance);
                 setTransactions(data.transactions || []);
+                setAutoRecharge(data.autoRecharge ?? true);
+                setThreshold(data.lowBalanceThreshold ?? 50);
+                setWalletPin(data.pin || "");
             } catch (err) {
                 console.error("Failed to fetch wallet data:", err);
             }
@@ -98,6 +102,19 @@ export default function WalletPage() {
         }
         checkBackend();
     }, []);
+
+    async function updateSettings(ar, ts) {
+        if (!user) return;
+        try {
+            await fetch(`${BACKEND}/api/wallet/${user._id}/settings`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ autoRecharge: ar, lowBalanceThreshold: ts }),
+            });
+        } catch (err) {
+            console.error("Failed to update settings:", err);
+        }
+    }
 
     function pushNotification(type, text) {
         setNotifications((s) => [{ id: Date.now(), type, text, time: new Date().toLocaleString() }, ...s].slice(0, 50));
@@ -206,7 +223,7 @@ export default function WalletPage() {
         }
     }
 
-    function handlePinSubmit(pinInput) {
+    async function handlePinSubmit(pinInput) {
         if (!walletPin) {
             if (pinInput.length < 4) {
                 alert("Choose a 4-digit PIN");
@@ -214,7 +231,16 @@ export default function WalletPage() {
             }
             setWalletPin(pinInput);
             setPinOpen(false);
-            pushNotification("success", "Wallet PIN set");
+            try {
+                await fetch(`${BACKEND}/api/wallet/${user._id}/pin`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ pin: pinInput }),
+                });
+                pushNotification("success", "Wallet PIN set and saved");
+            } catch (err) {
+                console.error("Failed to save PIN:", err);
+            }
             const cb = pendingActionRef.current;
             if (typeof cb === "function") {
                 cb();
@@ -238,7 +264,8 @@ export default function WalletPage() {
     const [q, setQ] = useState("");
     const filteredTransactions = transactions.filter((tx) => {
         if (filter === "recharge" && tx.type !== "Recharge" && tx.type !== "Cashback") return false;
-        if (filter === "ride" && (tx.type === "Recharge" || tx.type === "Cashback")) return false;
+        if (filter === "ride" && tx.type !== "Ride Charge") return false;
+        if (filter === "earnings" && tx.type !== "Earnings") return false;
         if (q && !(JSON.stringify(tx).toLowerCase().includes(q.toLowerCase()))) return false;
         return true;
     });
@@ -249,6 +276,12 @@ export default function WalletPage() {
 
 
             <ToastManager />
+
+            <WalletHeader
+                userName={user?.userName}
+                onNotificationClick={() => setNotifOpen(true)}
+                onProfileClick={() => navigate('/profile')}
+            />
 
             <div className="max-w-6xl mx-auto p-4 flex items-center justify-between">
                 <button onClick={() => navigate('/home')} className="px-6 py-2 rounded-xl border-2 border-black bg-white text-black font-bold hover:bg-gray-50 transition-colors">
@@ -271,10 +304,26 @@ export default function WalletPage() {
                         threshold={threshold}
                         onRechargeClick={() => setRechargeOpen(true)}
                         autoRecharge={autoRecharge}
-                        onAutoRechargeChange={setAutoRecharge}
-                        onThresholdChange={setThreshold}
+                        onAutoRechargeChange={(val) => {
+                            setAutoRecharge(val);
+                            updateSettings(val, threshold);
+                        }}
+                        onThresholdChange={(val) => {
+                            setThreshold(val);
+                            updateSettings(autoRecharge, val);
+                        }}
                         onSetPin={() => setPinOpen(true)}
                     />
+
+                    {balance < 50 && (
+                        <div className="bg-red-100 border-2 border-red-500 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+                            <span className="text-2xl">⚠️</span>
+                            <div>
+                                <p className="font-bold text-red-700">Low Balance Warning</p>
+                                <p className="text-sm text-red-600 font-medium">Please top up at least ₹50 for seamless rides.</p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Quick Stats */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

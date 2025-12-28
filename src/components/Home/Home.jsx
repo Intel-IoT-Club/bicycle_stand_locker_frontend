@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HomeCycle from "../../assets/Home_cycle.png";
+import HomeCycle from "../../assets/Home_Cycle.png";
 import SearchIcon from "../../assets/Search_icon.png";
 import Header from "../Header";
 

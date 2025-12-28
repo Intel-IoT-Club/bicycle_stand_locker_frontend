@@ -33,7 +33,7 @@ function RechargeModal({ open, onClose, onConfirm }) {
             footer={null}
         >
             <div className="p-6 space-y-8">
-                
+
                 {/* Amount Section */}
                 <div className="space-y-4">
                     <div className="flex justify-center">
@@ -49,8 +49,8 @@ function RechargeModal({ open, onClose, onConfirm }) {
                                 onClick={() => { setSelectedAmount(amt); setCustomAmount(""); }}
                                 className={`
                                     h-14 rounded-xl font-bold text-2xl transition-all border-b-4 active:border-b-0 active:translate-y-1
-                                    ${selectedAmount === amt 
-                                        ? "bg-white text-[#016766] border-[#016766] ring-2 ring-[#016766] ring-offset-2 ring-offset-black" 
+                                    ${selectedAmount === amt
+                                        ? "bg-white text-[#016766] border-[#016766] ring-2 ring-[#016766] ring-offset-2 ring-offset-black"
                                         : "bg-white text-black border-gray-300 hover:bg-gray-100"
                                     }
                                 `}
@@ -70,12 +70,12 @@ function RechargeModal({ open, onClose, onConfirm }) {
                         <div className="bg-[#016766] h-full w-14 flex items-center justify-center text-white text-2xl font-bold">
                             ₹
                         </div>
-                        <Input 
-                            placeholder="Enter custom amount" 
-                            type="number" 
-                            value={customAmount} 
-                            onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }} 
-                            className="border-none bg-transparent h-full text-black font-bold text-xl px-4 placeholder:text-gray-400 placeholder:text-lg focus:ring-0" 
+                        <Input
+                            placeholder="Enter custom amount"
+                            type="number"
+                            value={customAmount}
+                            onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
+                            className="border-none bg-transparent h-full text-black font-bold text-xl px-4 placeholder:text-gray-400 placeholder:text-lg focus:ring-0"
                         />
                     </div>
                 </div>
@@ -83,14 +83,14 @@ function RechargeModal({ open, onClose, onConfirm }) {
                 {/* Payment Method */}
                 <div className="space-y-3">
                     <div className="flex justify-start">
-                         <span className="bg-[#016766] text-white px-3 py-1 font-bold text-sm uppercase tracking-wider">
+                        <span className="bg-[#016766] text-white px-3 py-1 font-bold text-sm uppercase tracking-wider">
                             Payment Method
                         </span>
                     </div>
                     <div className="bg-white rounded-xl overflow-hidden border-2 border-white h-14 flex items-center px-4 relative">
-                        <select 
-                            className="w-full bg-transparent text-black font-bold text-lg focus:outline-none appearance-none z-10" 
-                            value={paymentMethod} 
+                        <select
+                            className="w-full bg-transparent text-black font-bold text-lg focus:outline-none appearance-none z-10"
+                            value={paymentMethod}
                             onChange={(e) => setPaymentMethod(e.target.value)}
                         >
                             <option value="UPI">UPI (Google Pay / PhonePe)</option>
@@ -104,19 +104,25 @@ function RechargeModal({ open, onClose, onConfirm }) {
                     </div>
                 </div>
 
+                {/* Save Method Checkbox */}
+                <div className="flex items-center gap-2 px-2">
+                    <input type="checkbox" id="saveMethod" className="w-5 h-5 accent-[#016766]" />
+                    <label htmlFor="saveMethod" className="text-white text-sm font-medium">Save this method for future payments</label>
+                </div>
+
                 {/* Footer Buttons */}
                 <div className="flex items-center justify-between gap-4 pt-4">
-                    <button 
-                        onClick={onClose} 
+                    <button
+                        onClick={onClose}
                         className="px-6 py-2 text-white font-bold hover:underline"
                     >
                         <span className="bg-[#016766] px-4 py-2">Cancel</span>
                     </button>
-                    <button 
-                        onClick={handleConfirm} 
+                    <button
+                        onClick={handleConfirm}
                         className="px-6 py-2 text-white font-bold hover:opacity-90 transition-opacity"
                     >
-                         <span className="bg-[#016766] px-6 py-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all border border-white">
+                        <span className="bg-[#016766] px-6 py-2 shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all border border-white">
                             Pay Securely
                         </span>
                     </button>

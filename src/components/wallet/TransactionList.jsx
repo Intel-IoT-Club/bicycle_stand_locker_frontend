@@ -23,10 +23,10 @@ function TransactionList({ transactions, onSync, onExport, onSearch, onFilter, f
                         ↻
                     </button>
                     <button onClick={() => {
-                            const rows = [["id", "type", "amount", "date", "balance"], ...transactions.map(t => [t.id || "-", t.type, t.amount, t.date, t.balance])];
-                            downloadCSV("transactions.csv", rows);
-                            onExport();
-                        }} 
+                        const rows = [["id", "type", "amount", "date", "balance"], ...transactions.map(t => [t.id || "-", t.type, t.amount, t.date, t.balance])];
+                        downloadCSV("transactions.csv", rows);
+                        onExport();
+                    }}
                         className="px-4 py-2 bg-black text-white font-bold rounded-lg hover:bg-gray-800"
                     >
                         Export CSV
@@ -35,17 +35,17 @@ function TransactionList({ transactions, onSync, onExport, onSearch, onFilter, f
             </div>
 
             <div className="flex flex-col md:flex-row gap-3 mb-6">
-                <input 
-                    placeholder="Search..." 
-                    value={q} 
-                    onChange={(e) => onSearch(e.target.value)} 
-                    className="flex-1 bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-black focus:border-[#016766] focus:outline-none font-bold placeholder-gray-400" 
+                <input
+                    placeholder="Search..."
+                    value={q}
+                    onChange={(e) => onSearch(e.target.value)}
+                    className="flex-1 bg-white border-2 border-gray-300 rounded-lg px-4 py-2 text-black focus:border-[#016766] focus:outline-none font-bold placeholder-gray-400"
                 />
                 <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
-                    {['all', 'recharge', 'ride'].map((f) => (
-                        <button 
+                    {['all', 'recharge', 'ride', 'earnings'].map((f) => (
+                        <button
                             key={f}
-                            onClick={() => onFilter(f)} 
+                            onClick={() => onFilter(f)}
                             className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${filter === f ? 'bg-[#016766] text-white shadow-sm' : 'text-gray-500 hover:text-black'}`}
                         >
                             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -66,14 +66,14 @@ function TransactionList({ transactions, onSync, onExport, onSearch, onFilter, f
                             </div>
                             <div>
                                 <div className="text-lg font-bold text-black">{tx.type}</div>
-                                <div className="text-sm text-gray-500 font-medium">{new Date(tx.date).toLocaleDateString()} • {new Date(tx.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                                <div className="text-sm text-gray-500 font-medium">{new Date(tx.date).toLocaleDateString()} • {new Date(tx.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                             </div>
                         </div>
                         <div className="text-right">
                             <div className={`text-xl font-bold ${tx.amount > 0 ? "text-[#016766]" : "text-black"}`}>
                                 {tx.amount > 0 ? '+' : ''}₹{Math.abs(tx.amount)}
                             </div>
-                            <div className="text-xs text-gray-400 font-bold mt-1">Bal: ₹{tx.balance}</div>
+                            <div className="text-xs text-gray-400 font-bold mt-1">Bal: ₹{tx.runningBalance || tx.balance || "-"}</div>
                         </div>
                     </div>
                 ))}
