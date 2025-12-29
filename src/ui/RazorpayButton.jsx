@@ -16,13 +16,13 @@ export default function RazorpayButton({ order, onSuccess, onError }) {
       prefill: {
         name: "Keerthi Vasan",
         email: "a.keerthivasan7676@gmail.com",
-        contact: "6374410xxx",
+        contact: "6374410000",
       },
       theme: {
-        color: "#3399cc",
+        color: "#016766",
       },
       modal: {
-        ondismiss: function() {
+        ondismiss: function () {
           console.log('Payment modal closed');
         }
       }

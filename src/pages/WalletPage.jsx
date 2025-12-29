@@ -201,6 +201,7 @@ export default function WalletPage() {
                     theme: { color: "#016766" },
                 };
 
+                console.log("Initializing Razorpay with options:", options);
                 if (typeof window.Razorpay === "undefined") {
                     alert("Razorpay SDK not loaded. Make sure the script is added to index.html");
                     return;

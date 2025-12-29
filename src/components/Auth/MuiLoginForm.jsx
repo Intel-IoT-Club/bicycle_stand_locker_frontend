@@ -44,7 +44,8 @@ const MuiLoginForm = () => {
         }
 
         try {
-            const endpoint = `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`;
+            const apiBase = import.meta.env.VITE_API_BASE_URL;
+            const endpoint = `${apiBase}/api/auth/login`;
             const identifier = formData.identifier.trim();
             let payload = { password: formData.password, role: formData.role };
 
@@ -54,7 +55,15 @@ const MuiLoginForm = () => {
                 payload.userName = identifier;
             }
 
-            const res = await axios.post(endpoint, payload);
+            console.log("Submitting login to:", endpoint);
+            console.log("Login Payload:", { ...payload, password: "***" });
+
+            const res = await axios.post(endpoint, payload, {
+                withCredentials: true,
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
             const data = res.data;
 
             if (data.token && data.user) {
@@ -68,7 +77,9 @@ const MuiLoginForm = () => {
                 throw new Error("Invalid response from server");
             }
         } catch (err) {
-            setError(err.response?.data?.message || err.message || "Login failed");
+            console.error("Login Error Object:", err);
+            const msg = err.response?.data?.message || err.response?.data?.error || err.message || "Login failed";
+            setError(msg);
         } finally {
             setLoading(false);
         }
