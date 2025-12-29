@@ -1,9 +1,9 @@
-import AuthForm from '../components/Auth/AuthForm';
+import MuiAuthPage from "../components/Auth/MuiAuthPage";
 
 const AuthPage = () => {
   return (
-    <div className="auth-page">
-      <AuthForm />
+    <div className="auth-page-container">
+      <MuiAuthPage />
     </div>
   );
 };
