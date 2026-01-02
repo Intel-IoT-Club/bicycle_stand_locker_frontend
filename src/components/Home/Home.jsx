@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeCycle from "../../assets/Home_Cycle.png";
 import SearchIcon from "../../assets/Search_icon.png";
-import Header from "../Header";
+
 
 const Home = () => {
   const [boarding, setBoarding] = useState("");
@@ -56,7 +56,7 @@ const Home = () => {
 
   return (
     <>
-      <Header />
+
       <div className="min-h-screen bg-[#F9F8E9] pt-30 px-48 font-afacad m-0">
         <div className="flex justify-between">
           <div className="flex flex-col gap-y-8 w-1/3 ">
