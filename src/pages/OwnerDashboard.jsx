@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../components/Contexts/authContext';
 import OwnerStats from '../components/Owner/OwnerStats';
-import UserManagement from '../components/Owner/UserManagement';
+import OwnerWallet from '../components/Owner/OwnerWallet';
 import BicycleManagement from '../components/Owner/BicycleManagement';
 import LiveRides from '../components/Owner/LiveRides';
 import WithdrawModal from '../components/Owner/WithdrawModal';
@@ -61,6 +61,39 @@ const OwnerDashboard = () => {
         }
     };
 
+    const handleDeleteConfirm = async (bikeId) => {
+        try {
+            const res = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/owner/bike/${bikeId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                alert("Bicycle unit removed successfully!");
+                fetchData();
+            }
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || "Deletion failed");
+        }
+    };
+
+    const handleDeleteAllConfirm = async () => {
+        if (!window.confirm("WARNING: This will delete ALL bicycles in your fleet. This action cannot be undone. Are you sure?")) {
+            return;
+        }
+        try {
+            const res = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/owner/bikes/all`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                alert(res.data.message);
+                fetchData();
+            }
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || "Failed to delete all bikes");
+        }
+    };
+
     const handleLogout = () => {
         logout();
         navigate('/auth');
@@ -87,10 +120,10 @@ const OwnerDashboard = () => {
     };
 
     const navItems = [
-        { id: 'Overview', label: 'Dashboard' },
-        { id: 'Availability', label: 'Toggle Availability' },
-        { id: 'Live', label: 'Ride Status' },
-        { id: 'Wallet', label: 'Earnings & Wallet' },
+        { id: 'Overview', label: 'Home' },
+        { id: 'Availability', label: 'My Fleet' },
+        { id: 'Live', label: 'Live Operations' },
+        { id: 'Wallet', label: 'Payouts' },
     ];
 
     if (!token) return null;
@@ -101,7 +134,7 @@ const OwnerDashboard = () => {
             <div className="flex justify-between px-10 items-center w-full h-16 bg-black text-white sticky top-0 z-50 shadow-lg">
                 <div className="flex items-center gap-4">
                     <div className="cursor-pointer font-bold text-2xl tracking-tighter text-[#00ff88]" onClick={() => navigate("/home")}>
-                        SMART<span className="text-white">LOCKER</span>
+                        AMRITA <span className="text-white">BRS</span>
                     </div>
                     <div className="hidden md:block px-3 py-1 bg-[#1c1c1c] rounded text-[10px] font-bold text-[#00ff88] border border-[#00ff88]/30">
                         OWNER PORTAL
@@ -158,12 +191,12 @@ const OwnerDashboard = () => {
                 <div className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-5xl font-extrabold tracking-tight text-black flex items-center gap-4">
-                            {activeTab === 'Overview' && "System Overview"}
-                            {activeTab === 'Availability' && "Availability Toggle"}
-                            {activeTab === 'Live' && "Live Ride Status"}
-                            {activeTab === 'Wallet' && "Fare & Wallet Summary"}
+                            {activeTab === 'Overview' && "Owner's Home"}
+                            {activeTab === 'Availability' && "Fleet Management"}
+                            {activeTab === 'Live' && "Live Operations"}
+                            {activeTab === 'Wallet' && "Financial Overview"}
                         </h1>
-                        <p className="text-gray-600 mt-2 font-medium">Bicycle Locker Management & Ownership</p>
+                        <p className="text-gray-600 mt-2 font-medium">Amrita Bicycle Rental System</p>
                     </div>
 
                     {/* Quick Button consistent with Riders UI */}
@@ -185,10 +218,12 @@ const OwnerDashboard = () => {
                             bikes={bikes}
                             onRefresh={fetchData}
                             onRegister={handleRegisterConfirm}
+                            onDelete={handleDeleteConfirm}
+                            onDeleteAll={handleDeleteAllConfirm}
                         />
                     )}
                     {!loading && activeTab === 'Live' && <LiveRides />}
-                    {!loading && activeTab === 'Wallet' && <UserManagement />}
+                    {!loading && activeTab === 'Wallet' && <OwnerWallet />}
                 </div>
             </main>
 
