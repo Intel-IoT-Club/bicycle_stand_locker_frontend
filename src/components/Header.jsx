@@ -5,7 +5,7 @@ const Header = () => {
   const navigate = useNavigate();
   return (
     <div className="flex justify-between px-5 items-center w-full h-12 bg-black text-white">
-      <div className="cursor-pointer font-bold text-xl" onClick={() => navigate("/home")}>Locker</div>
+      <div className="cursor-pointer font-bold text-xl" onClick={() => navigate("/home")}>Amrita BRS</div>
       <div className="flex gap-x-10">
         <div className="cursor-pointer hover:text-gray-300" onClick={() => navigate("/home")}>Home</div>
         <div className="cursor-pointer hover:text-gray-300" onClick={() => navigate("/my-rides")}>My Rides</div>

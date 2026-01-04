@@ -156,7 +156,7 @@ export default function MuiAuthPage() {
                                 textShadow: mode === "dark" ? "0 0 20px rgba(0, 255, 136, 0.5)" : "none",
                             }}
                         >
-                            Smart Locker
+                            Amrita Bicycle Rental System
                         </Typography>
                         <Typography
                             variant="body2"

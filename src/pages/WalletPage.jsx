@@ -163,13 +163,14 @@ export default function WalletPage() {
 
                 const options = {
                     key: RAZORPAY_KEY_ID,
-                    amount: orderData.amount,
-                    currency: orderData.currency || "INR",
+                    amount: Number(orderData.amount), // Force absolute number (paise)
+                    currency: String(orderData.currency || "INR"), // Force absolute string
                     name: "Bicycle Wallet",
                     description: `Recharge ₹${amount}`,
-                    order_id: orderData.id,
+                    order_id: String(orderData.id),
                     handler: async function (response) {
                         try {
+                            console.log("Razorpay Success Response:", response);
                             const verifyData = {
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_payment_id: response.razorpay_payment_id,
@@ -182,7 +183,7 @@ export default function WalletPage() {
                                 pushNotification("success", `Recharge ₹${amount} successful`);
                                 notify.success(`Recharge ₹${amount} successful`);
                                 fireConfetti();
-                                setRechargeOpen(false); // Close modal on success
+                                setRechargeOpen(false);
                             } else {
                                 pushNotification("warning", "Payment verification failed");
                                 notify.error("Payment verification failed");
@@ -196,11 +197,16 @@ export default function WalletPage() {
                     prefill: {
                         name: user?.userName || "User",
                         email: user?.email || "user@example.com",
-                        contact: user?.phone || "",
+                        contact: user?.phone?.replace(/\D/g, '') || "6374410000", // Sanitize phone
                     },
                     theme: { color: "#016766" },
                 };
 
+                if (RAZORPAY_KEY_ID?.startsWith('rzp_test') && orderData.id?.startsWith('order_')) {
+                    console.warn("⚠️ Mode Mismatch: Using TEST Key with a generated Order. Ensure both are LIVE.");
+                }
+
+                console.log("Initializing Razorpay with options:", options);
                 if (typeof window.Razorpay === "undefined") {
                     alert("Razorpay SDK not loaded. Make sure the script is added to index.html");
                     return;

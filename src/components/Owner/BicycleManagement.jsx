@@ -37,16 +37,31 @@ const MaintenanceModal = ({ isOpen, onClose, bikeId }) => {
     );
 };
 
-const BikeCard = ({ bike }) => {
+const BikeCard = ({ bike, onDelete }) => {
     const [isAvailable, setIsAvailable] = useState(bike.available);
     const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
     const [showLogs, setShowLogs] = useState(false);
 
+    const handleDelete = () => {
+        if (window.confirm(`Are you sure you want to remove ${bike.displayId}? This cannot be undone.`)) {
+            onDelete(bike.id);
+        }
+    };
+
     return (
         <div className="bg-white p-6 rounded-3xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex flex-col gap-6 relative overflow-hidden group">
+            {/* Delete Button (Trash Icon) */}
+            <button
+                onClick={handleDelete}
+                className="absolute top-2 right-2 p-2 bg-red-50 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 z-10"
+                title="Remove Bike"
+            >
+                🗑
+            </button>
+
             <div className="flex justify-between items-start pt-2">
                 <div>
-                    <div className="text-2xl font-black text-black tracking-tighter uppercase">{bike.id}</div>
+                    <div className="text-2xl font-black text-black tracking-tighter uppercase">{bike.displayId}</div>
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{bike.model}</div>
                 </div>
                 <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter border-2 ${isAvailable ? 'bg-green-100 text-green-700 border-green-500' : 'bg-red-100 text-red-700 border-red-500'
@@ -127,7 +142,7 @@ const BikeCard = ({ bike }) => {
     );
 };
 
-export default function BicycleManagement({ bikes, onRefresh, onRegister }) {
+export default function BicycleManagement({ bikes, onRefresh, onRegister, onDelete, onDeleteAll }) {
     const [registerOpen, setRegisterOpen] = useState(false);
     const list = bikes?.length > 0 ? bikes : [];
 
@@ -139,6 +154,14 @@ export default function BicycleManagement({ bikes, onRefresh, onRegister }) {
                     <p className="text-sm font-bold text-gray-400 uppercase tracking-widest">Monitor logs and health status</p>
                 </div>
                 <div className="flex gap-4 w-full sm:w-auto">
+                    {list.length > 0 && (
+                        <button
+                            onClick={onDeleteAll}
+                            className="flex-1 sm:flex-none px-6 py-3 bg-red-100 text-red-600 font-black rounded-xl border-2 border-red-200 hover:bg-red-200 hover:border-red-300 transition-all uppercase text-xs tracking-widest"
+                        >
+                            Delete All
+                        </button>
+                    )}
                     <button
                         onClick={() => setRegisterOpen(true)}
                         className="flex-1 sm:flex-none px-8 py-3 bg-black text-white font-black rounded-xl border-2 border-black hover:bg-gray-800 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase text-xs tracking-widest"
@@ -150,13 +173,18 @@ export default function BicycleManagement({ bikes, onRefresh, onRegister }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                 {list.map((bike) => (
-                    <BikeCard key={bike._id} bike={{
-                        id: bike.cycleId,
-                        model: bike.type,
-                        available: bike.availabilityFlag,
-                        health: bike.health || 'Excellent',
-                        logs: [] // Logs can be fetched per bike later
-                    }} />
+                    <BikeCard
+                        key={bike._id}
+                        bike={{
+                            id: bike._id, // Must use _id for delete API
+                            displayId: bike.cycleId, // Show readable ID
+                            model: bike.type,
+                            available: bike.availabilityFlag,
+                            health: bike.health || 'Excellent',
+                            logs: []
+                        }}
+                        onDelete={onDelete}
+                    />
                 ))}
 
                 <div

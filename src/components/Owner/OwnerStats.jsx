@@ -61,7 +61,7 @@ export default function OwnerStats({ stats }) {
                 ))}
             </div>
 
-            {/* Visual Analytics consistent with Rider's Wallet patterns */}
+            {/* Visual Analytics */}
             <div className="bg-white p-8 rounded-3xl border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] min-h-[400px] flex flex-col">
                 <div className="flex justify-between items-center mb-10">
                     <h3 className="text-2xl font-extrabold uppercase tracking-tight">Active Usage Trends</h3>
@@ -71,20 +71,12 @@ export default function OwnerStats({ stats }) {
                     </div>
                 </div>
 
-                <div className="flex-1 border-b-2 border-l-2 border-dashed border-gray-200 m-4 relative">
-                    <div className="absolute bottom-10 left-10 right-10 top-10 flex items-end justify-between gap-4">
-                        {[40, 70, 45, 90, 65, 80, 55, 75, 95, 60, 85, 50].map((h, i) => (
-                            <div key={i} className="w-full bg-[#016766] rounded-t-lg relative group transition-all" style={{ height: `${h}%` }}>
-                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                    ₹{(h * 100).toLocaleString()}
-                                </div>
-                            </div>
-                        ))}
+                <div className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
+                    <div className="text-4xl mb-4">📊</div>
+                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest text-center">
+                        <p>Not enough historical data</p>
+                        <p className="text-[10px] mt-1 opacity-60">Ride trends will appear here once more trips are completed.</p>
                     </div>
-                </div>
-
-                <div className="mt-6 flex justify-between text-[10px] font-bold text-gray-400 px-6 uppercase tracking-widest">
-                    <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
                 </div>
             </div>
         </div>
