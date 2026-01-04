@@ -387,106 +387,29 @@ const RideTracking = () => {
           <div className="text-right">
             <div className="text-xs font-bold text-teal-600 uppercase tracking-wider">Live Fare</div>
             <div className="text-2xl font-bold text-teal-700">₹{price}</div>
-          </div>
-        </div>
-
-        {/* Bottom Panel */}
-        {showPaymentSummary ? (
-          <div className="glass-card pointer-events-auto p-8 mx-auto w-full max-w-md bg-white/95 backdrop-blur-xl animate-in slide-in-from-bottom duration-500">
-            <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">Trip Summary</h2>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between border-b border-slate-100 pb-2">
-                <span className="text-slate-500">Distance</span>
-                <span className="font-bold text-slate-800">{distCoveredDisplay}</span>
-              </div>
-              <div className="flex justify-between border-b border-slate-100 pb-2">
-                <span className="text-slate-500">Time</span>
-                <span className="font-bold text-slate-800">{rideTimeDisplay}</span>
-              </div>
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-slate-500">Total</span>
-                <span className="font-bold text-3xl text-teal-700">₹{price}</span>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] font-sans p-4 pointer-events-auto">
+              <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
+                <h3 className="text-xl font-bold mb-6 text-center text-slate-800">Enter Wallet PIN</h3>
+                <div className="flex justify-center mb-8">
+                  <input
+                    type="password"
+                    maxLength={4}
+                    value={pinInput}
+                    onChange={(e) => setPinInput(e.target.value)}
+                    className="w-32 text-center text-4xl tracking-[0.5em] border-b-2 border-slate-200 focus:border-teal-600 outline-none py-2 font-mono bg-transparent"
+                    autoFocus
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setShowPinModal(false)} className="py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+                  <button onClick={handleWalletPayment} className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition shadow-lg">Confirm</button>
+                </div>
               </div>
             </div>
-
-            <div className="grid gap-3">
-              <button
-                className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${wallet?.balance >= livePrice ? "bg-teal-700 text-white hover:bg-teal-800 shadow-teal-700/20" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
-                onClick={handleWalletPayment}
-                disabled={wallet?.balance < livePrice}
-              >
-                Pay with Wallet (Bal: ₹{wallet?.balance?.toFixed(0)})
-              </button>
-
-              <button
-                className="w-full py-4 rounded-xl font-bold text-lg border-2 border-slate-900 text-slate-900 hover:bg-slate-50 transition-all"
-                onClick={handlePayment}
-              >
-                Pay Online
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="glass-card pointer-events-auto p-6 mx-auto w-full max-w-4xl grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-white/90">
-            <div className="text-center md:text-left">
-              <div className="text-slate-400 text-xs font-bold uppercase">Destination</div>
-              <div className="text-slate-800 font-semibold truncate max-w-[200px]">{toAddress}</div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 col-span-2">
-              <div className="text-center p-2 bg-slate-50 rounded-lg">
-                <div className="text-slate-400 text-[10px] font-bold uppercase">Time</div>
-                <div className="font-bold text-xl text-slate-800">{rideTimeDisplay}</div>
-              </div>
-              <div className="text-center p-2 bg-slate-50 rounded-lg">
-                <div className="text-slate-400 text-[10px] font-bold uppercase">Km Left</div>
-                <div className="font-bold text-xl text-slate-800">{distLeftDisplay}</div>
-              </div>
-              <div className="text-center p-2 bg-teal-50 rounded-lg">
-                <div className="text-teal-600 text-[10px] font-bold uppercase">ETA</div>
-                <div className="font-bold text-xl text-teal-700">{timeLeftMin ? `${Math.ceil(timeLeftMin)}m` : "--"}</div>
-              </div>
-            </div>
-
-            <button
-              disabled={rideEnded}
-              className={`h-full w-full rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95
-                      ${!rideEnded
-                  ? "bg-red-600 hover:bg-red-700 shadow-red-600/30"
-                  : "bg-slate-400 cursor-not-allowed"}`}
-              onClick={handleEndRide}
-            >
-              {rideEnded ? "ENDED" : "END RIDE"}
-            </button>
-          </div>
-        )}
-      </div>
-
-      {showPinModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] font-sans p-4 pointer-events-auto">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
-            <h3 className="text-xl font-bold mb-6 text-center text-slate-800">Enter Wallet PIN</h3>
-            <div className="flex justify-center mb-8">
-              <input
-                type="password"
-                maxLength={4}
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                className="w-32 text-center text-4xl tracking-[0.5em] border-b-2 border-slate-200 focus:border-teal-600 outline-none py-2 font-mono bg-transparent"
-                autoFocus
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => setShowPinModal(false)} className="py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
-              <button onClick={handleWalletPayment} className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition shadow-lg">Confirm</button>
-            </div>
-          </div>
-        </div>
       )}
 
-    </AnimationWrapper>
-  );
+          </AnimationWrapper>
+          );
 };
 
-export default RideTracking;
+          export default RideTracking;
