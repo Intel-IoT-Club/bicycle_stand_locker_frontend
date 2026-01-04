@@ -5,6 +5,8 @@ import Thumbnail from "../assets/Mockup-Bicycle.png";
 import axios from "axios";
 import { useAuth } from "../components/Contexts/authContext";
 
+const DISTANCE_THRESHOLD = 20000; // meters
+
 const formatTime = (minutes) => {
   if (minutes < 60) return `${Math.round(minutes)} min`;
   const hrs = Math.floor(minutes / 60);
@@ -88,7 +90,7 @@ const RideStart = () => {
       const dist = distanceMeters(userPos.lat, userPos.lng, bikeLat, bikeLng);
 
       // 2 meters threshold
-      return dist <= 2;
+      return dist <= DISTANCE_THRESHOLD;
     } catch (err) {
       console.error("GPS error:", err);
       return null; // unknown
