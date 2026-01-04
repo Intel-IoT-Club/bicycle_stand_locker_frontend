@@ -29,7 +29,7 @@ const RideTracking = () => {
   const [pinInput, setPinInput] = useState("");
   const [showPinModal, setShowPinModal] = useState(false);
 
-  const canEndRide = distanceLeft < 1; // 200 meters
+  // const canEndRide = distanceLeft < 1; // Removed restriction
 
   /* ---------------- FALLBACK DATA (UNCHANGED) ---------------- */
   const bikeId = ride?.bikeId || bike?._id || "N/A";
@@ -461,9 +461,9 @@ const RideTracking = () => {
               </div>
 
               <button
-                disabled={!canEndRide || rideEnded}
+                disabled={rideEnded}
                 className={`text-white text-4xl font-bold px-36 py-6 rounded-lg
-                  ${canEndRide && !rideEnded
+                  ${!rideEnded
                     ? "bg-red-600 hover:bg-red-700"
                     : "bg-gray-400 cursor-not-allowed"}`}
                 onClick={handleEndRide}
