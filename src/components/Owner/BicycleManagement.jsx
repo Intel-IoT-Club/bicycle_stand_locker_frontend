@@ -2,19 +2,59 @@ import React, { useState } from 'react';
 import RegisterBikeModal from './RegisterBikeModal';
 
 
+import axios from 'axios';
+import { useAuth } from '../Contexts/authContext';
+
 const MaintenanceModal = ({ isOpen, onClose, bikeId }) => {
+    const { token } = useAuth();
+    const [severity, setSeverity] = useState("Low");
+    const [description, setDescription] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+
     if (!isOpen) return null;
+
+    const handleSubmit = async () => {
+        if (!description) return alert("Please describe the issue.");
+        setSubmitting(true);
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/maintenance/report`, {
+                bikeId,
+                issue: description,
+                severity: severity.split(" ")[0], // "Low (Minor...)" -> "Low"
+                reportedBy: 'Owner'
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.data.success) {
+                alert("Maintenance report submitted!");
+                onClose();
+                setDescription("");
+                // Ideally refresh parent, but onClose is enough for now 
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to submit report");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] w-full max-w-md p-8 animate-in fade-in zoom-in duration-200">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-2xl font-black uppercase tracking-tight">Report Issue: {bikeId}</h3>
+                    <h3 className="text-2xl font-black uppercase tracking-tight">Report Issue</h3>
                     <button onClick={onClose} className="text-2xl font-black hover:rotate-90 transition-transform">✕</button>
                 </div>
                 <div className="space-y-4">
                     <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Severity Level</label>
-                        <select className="w-full p-3 bg-gray-100 border-2 border-black rounded-xl font-bold outline-none">
+                        <select
+                            value={severity}
+                            onChange={(e) => setSeverity(e.target.value)}
+                            className="w-full p-3 bg-gray-100 border-2 border-black rounded-xl font-bold outline-none"
+                        >
                             <option>Low (Minor scratch/adjustment)</option>
                             <option>Medium (Tire/Chain issue)</option>
                             <option>High (Brake/Light issue)</option>
@@ -24,12 +64,18 @@ const MaintenanceModal = ({ isOpen, onClose, bikeId }) => {
                     <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Issue Description</label>
                         <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
                             className="w-full p-3 bg-gray-100 border-2 border-black rounded-xl font-bold outline-none min-h-[100px]"
                             placeholder="Describe what's wrong..."
                         ></textarea>
                     </div>
-                    <button className="w-full py-4 bg-[#016766] text-white font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all uppercase tracking-widest mt-4">
-                        Submit Report
+                    <button
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="w-full py-4 bg-[#016766] text-white font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all uppercase tracking-widest mt-4 disabled:opacity-50"
+                    >
+                        {submitting ? "Submitting..." : "Submit Report"}
                     </button>
                 </div>
             </div>
