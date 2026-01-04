@@ -1,18 +1,18 @@
 import axios from "axios";
-import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import MapView from "../components/MapView";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
-const SIMULATE_RIDE = true; // set false in production
 import { useAuth } from "../components/Contexts/authContext";
+import AnimationWrapper from "../components/AnimationWrapper";
+
+const SIMULATE_RIDE = true; // set false in production
 
 const RideTracking = () => {
   const { state } = useLocation();
   const { ride, bike } = state || {};
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, user } = useAuth(); // Fixed destructuring
+
   /* ---------------- UI STATE ---------------- */
   const [showPaymentSummary, setShowPaymentSummary] = useState(false);
   const [routeCoords, setRouteCoords] = useState([]);
@@ -31,7 +31,7 @@ const RideTracking = () => {
 
   // const canEndRide = distanceLeft < 1; // Removed restriction
 
-  /* ---------------- FALLBACK DATA (UNCHANGED) ---------------- */
+  /* ---------------- FALLBACK DATA ---------------- */
   const bikeId = ride?.bikeId || bike?._id || "N/A";
   const bikeName = ride?.bikeName || bike?.cycleName || "N/A";
 
@@ -235,14 +235,16 @@ const RideTracking = () => {
     if (!user?._id) return;
     const fetchWallet = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`, {
+          headers: { Authorization: `Bearer ${token}` } // ADDED AUTH HEADER
+        });
         setWallet(res.data);
       } catch (err) {
         console.error("Failed to fetch wallet:", err);
       }
     };
     fetchWallet();
-  }, [user?._id, showPaymentSummary]);
+  }, [user?._id, showPaymentSummary, token]);
 
   /* ---------------- END RIDE ---------------- */
   const handleEndRide = async () => {
@@ -289,7 +291,8 @@ const RideTracking = () => {
           amount: livePrice,
           rideId: ride._id,
           pin: pinInput
-        }
+        },
+        { headers: { Authorization: `Bearer ${token}` } } // ADDED AUTH
       );
 
       if (res.data.success) {
@@ -304,7 +307,8 @@ const RideTracking = () => {
   const handlePayment = async () => {
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
-      { amount: livePrice }
+      { amount: livePrice },
+      { headers: { Authorization: `Bearer ${token}` } } // ADDED AUTH
     );
 
     const { order } = response.data;
@@ -323,7 +327,8 @@ const RideTracking = () => {
             {
               response,
               ride
-            }
+            },
+            { headers: { Authorization: `Bearer ${token}` } } // ADDED AUTH
           );
 
           // 3️⃣ Redirect ONLY after backend success
@@ -338,7 +343,7 @@ const RideTracking = () => {
         }
       },
 
-      theme: { color: "#3399cc" },
+      theme: { color: "#016766" },
     };
 
     new window.Razorpay(options).open();
@@ -355,126 +360,132 @@ const RideTracking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col items-center p-5">
+    <AnimationWrapper className="h-screen w-full relative bg-slate-100 font-sans overflow-hidden">
 
-      <div className="pb-6">
-        <div className="text-6xl font-bold text-center">{bikeName}</div>
+      {/* Full Screen Map */}
+      <div className="absolute inset-0 z-0">
+        <MapView
+          boarding={boardingLoc}
+          destination={destinationLoc}
+          cycles={currentLocation ? [{ ...bike, location: { coordinates: [currentLocation.lng, currentLocation.lat] } }] : [bike]}
+          selectedBikeId={bike?._id}
+          onSelectBike={() => { }}
+          routeCoords={routeCoords}
+          bikeDistance={null}
+        />
       </div>
 
-      <div className="flex flex-row gap-5 w-full pr-20 pl-20">
+      {/* Floating Glass Panels */}
+      <div className="absolute inset-0 z-10 pointer-events-none flex flex-col justify-between p-4 pb-8">
 
-        <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
-          <MapView
-            boarding={boardingLoc}
-            destination={destinationLoc}
-            cycles={currentLocation ? [{ ...bike, location: { coordinates: [currentLocation.lng, currentLocation.lat] } }] : [bike]}
-            selectedBikeId={bike?._id}
-            onSelectBike={() => { }}
-            routeCoords={routeCoords}
-            bikeDistance={null}
-          //currentLocation={currentLocation}
-          />
+        {/* Top Bar */}
+        <div className="glass-card pointer-events-auto p-4 flex justify-between items-center mx-auto w-full max-w-4xl mt-4">
+          <div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Current Ride</div>
+            <div className="text-xl font-bold text-slate-800">{bikeName}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs font-bold text-teal-600 uppercase tracking-wider">Live Fare</div>
+            <div className="text-2xl font-bold text-teal-700">₹{price}</div>
+          </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center gap-4">
+        {/* Bottom Panel */}
+        {showPaymentSummary ? (
+          <div className="glass-card pointer-events-auto p-8 mx-auto w-full max-w-md bg-white/95 backdrop-blur-xl animate-in slide-in-from-bottom duration-500">
+            <h2 className="text-2xl font-bold mb-6 text-center text-slate-800">Trip Summary</h2>
 
-          {showPaymentSummary ? (
-            <div className="flex flex-col items-center gap-6">
-
-              <h2 className="text-5xl font-bold mb-4">Payment Summary</h2>
-
-              <div className="bg-black text-white text-3xl rounded-xl px-6 py-4 w-140">
-                <div>Bike ID: {bikeId}</div>
-                <div>Bike Name: {bikeName}</div>
-                <div>From: {fromAddress}</div>
-                <div>To: {toAddress}</div>
-                <div>Ride Time: {rideTimeDisplay}</div>
-                <div>Distance Covered: {distCoveredDisplay}</div>
-                <div className="text-4xl font-bold mt-4">Amount: ₹{price}</div>
+            <div className="space-y-4 mb-8">
+              <div className="flex justify-between border-b border-slate-100 pb-2">
+                <span className="text-slate-500">Distance</span>
+                <span className="font-bold text-slate-800">{distCoveredDisplay}</span>
               </div>
-
-              <div className="flex w-full gap-4 px-20">
-                <button
-                  className={`flex-1 text-2xl font-bold py-4 rounded-xl transition-all border-2 border-black ${wallet?.balance >= livePrice ? "bg-[#016766] text-white hover:bg-[#015554]" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
-                  onClick={handleWalletPayment}
-                  disabled={wallet?.balance < livePrice}
-                >
-                  PAY WITH WALLET (₹{wallet?.balance?.toFixed(2) || "0"})
-                </button>
-
-                <button
-                  className="flex-1 bg-white text-black border-2 border-black hover:bg-gray-50 text-2xl font-bold py-4 rounded-xl"
-                  onClick={handlePayment}
-                >
-                  ONLINE PAYMENT
-                </button>
+              <div className="flex justify-between border-b border-slate-100 pb-2">
+                <span className="text-slate-500">Time</span>
+                <span className="font-bold text-slate-800">{rideTimeDisplay}</span>
               </div>
-
-              {showPinModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] font-afacad">
-                  <div className="bg-white p-8 rounded-2xl border-4 border-black w-80">
-                    <h3 className="text-2xl font-bold mb-4">Enter Wallet PIN</h3>
-                    <input
-                      type="password"
-                      maxLength={4}
-                      value={pinInput}
-                      onChange={(e) => setPinInput(e.target.value)}
-                      className="w-full text-center text-4xl tracking-widest border-2 border-gray-300 rounded-lg py-2 mb-6"
-                    />
-                    <div className="flex gap-4">
-                      <button onClick={() => setShowPinModal(false)} className="flex-1 font-bold py-2 rounded-lg border-2 border-black">Cancel</button>
-                      <button onClick={handleWalletPayment} className="flex-1 bg-black text-white font-bold py-2 rounded-lg">Confirm</button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <div className="flex justify-between items-center pt-2">
+                <span className="text-slate-500">Total</span>
+                <span className="font-bold text-3xl text-teal-700">₹{price}</span>
+              </div>
             </div>
-          ) : (
-            <>
-              <div className="bg-black text-white text-xl rounded-xl px-6 py-4 w-140">
-                <div><b className="text-3xl">From:</b>&nbsp; {fromAddress}</div>
-                <div><b className="text-3xl">To:</b>&nbsp; {toAddress}</div>
-              </div>
 
-              <div className="flex justify-center items-center gap-36 relative mt-18">
-                <div className="bg-black text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center z-20">
-                  <div>Ride Time</div>
-                  <div className="text-5xl font-bold">{rideTimeDisplay}</div>
-                </div>
-
-                <div className="bg-[#016766] text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center absolute top-[-50px] left-1/2 transform -translate-x-1/2 z-10">
-                  <div>Time Left</div>
-                  <div className="text-5xl font-bold">
-                    {timeLeftMin ? `${Math.ceil(timeLeftMin)} min` : "--"}
-                  </div>
-                </div>
-
-                <div className="bg-black text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center ml-auto z-10">
-                  <div>Dist. Left</div>
-                  <div className="text-5xl font-bold">{distLeftDisplay}</div>
-                </div>
-              </div>
-
-              <div className="bg-[#016766] text-white text-center px-6 py-3 rounded-lg">
-                <div className="text-2xl">Dist. Covered: {distCoveredDisplay}</div>
-                <div className="text-4xl">Est. Fare: ₹{price}</div>
-              </div>
+            <div className="grid gap-3">
+              <button
+                className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg transition-all ${wallet?.balance >= livePrice ? "bg-teal-700 text-white hover:bg-teal-800 shadow-teal-700/20" : "bg-slate-200 text-slate-400 cursor-not-allowed"}`}
+                onClick={handleWalletPayment}
+                disabled={wallet?.balance < livePrice}
+              >
+                Pay with Wallet (Bal: ₹{wallet?.balance?.toFixed(0)})
+              </button>
 
               <button
-                disabled={rideEnded}
-                className={`text-white text-4xl font-bold px-36 py-6 rounded-lg
-                  ${!rideEnded
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-gray-400 cursor-not-allowed"}`}
-                onClick={handleEndRide}
+                className="w-full py-4 rounded-xl font-bold text-lg border-2 border-slate-900 text-slate-900 hover:bg-slate-50 transition-all"
+                onClick={handlePayment}
               >
-                {rideEnded ? "RIDE ENDED" : "END RIDE"}
+                Pay Online
               </button>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        ) : (
+          <div className="glass-card pointer-events-auto p-6 mx-auto w-full max-w-4xl grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-white/90">
+            <div className="text-center md:text-left">
+              <div className="text-slate-400 text-xs font-bold uppercase">Destination</div>
+              <div className="text-slate-800 font-semibold truncate max-w-[200px]">{toAddress}</div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 col-span-2">
+              <div className="text-center p-2 bg-slate-50 rounded-lg">
+                <div className="text-slate-400 text-[10px] font-bold uppercase">Time</div>
+                <div className="font-bold text-xl text-slate-800">{rideTimeDisplay}</div>
+              </div>
+              <div className="text-center p-2 bg-slate-50 rounded-lg">
+                <div className="text-slate-400 text-[10px] font-bold uppercase">Km Left</div>
+                <div className="font-bold text-xl text-slate-800">{distLeftDisplay}</div>
+              </div>
+              <div className="text-center p-2 bg-teal-50 rounded-lg">
+                <div className="text-teal-600 text-[10px] font-bold uppercase">ETA</div>
+                <div className="font-bold text-xl text-teal-700">{timeLeftMin ? `${Math.ceil(timeLeftMin)}m` : "--"}</div>
+              </div>
+            </div>
+
+            <button
+              disabled={rideEnded}
+              className={`h-full w-full rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95
+                      ${!rideEnded
+                  ? "bg-red-600 hover:bg-red-700 shadow-red-600/30"
+                  : "bg-slate-400 cursor-not-allowed"}`}
+              onClick={handleEndRide}
+            >
+              {rideEnded ? "ENDED" : "END RIDE"}
+            </button>
+          </div>
+        )}
       </div>
-    </div>
+
+      {showPinModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] font-sans p-4 pointer-events-auto">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
+            <h3 className="text-xl font-bold mb-6 text-center text-slate-800">Enter Wallet PIN</h3>
+            <div className="flex justify-center mb-8">
+              <input
+                type="password"
+                maxLength={4}
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value)}
+                className="w-32 text-center text-4xl tracking-[0.5em] border-b-2 border-slate-200 focus:border-teal-600 outline-none py-2 font-mono bg-transparent"
+                autoFocus
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <button onClick={() => setShowPinModal(false)} className="py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+              <button onClick={handleWalletPayment} className="py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition shadow-lg">Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </AnimationWrapper>
   );
 };
 
