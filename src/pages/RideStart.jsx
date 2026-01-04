@@ -159,6 +159,8 @@ const RideStart = () => {
     setIsUnlocking(true);
 
     try {
+      // Distance check removed as per request
+      /*
       const close = await isCloseEnoughToBike();
       if (close === null) {
         alert(
@@ -172,6 +174,7 @@ const RideStart = () => {
         setIsUnlocking(false);
         return;
       }
+      */
 
       // Create ride (with payment.paid = false) if not yet created
       let rideToUse;
@@ -357,13 +360,15 @@ const RideStart = () => {
 
         <div className="mt-6 bg-white p-6 rounded-xl border-2 border-gray-300">
           <div className="text-center text-2xl text-gray-1200 mb-4">
-            <span className="font-bold">Go to Bicycle to start Ride</span>
+            <span className="font-bold">You can now unlock the bike</span>
+            {/* Distance warning removed
             <div className="text-gray-600">
               {" "}
               (Note: You should be at minimum of 2 meters distance closer to Bicycle to
               Unlock and start ride){" "}
             </div>
             <div>Walk {Math.round(bike.walkDistanceKm * 1000)} more meters to unlock</div>
+            */}
           </div>
 
           <button
