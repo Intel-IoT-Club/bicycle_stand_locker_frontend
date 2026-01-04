@@ -32,6 +32,40 @@ const MyRides = () => {
     return new Date(dateStr).toLocaleString();
   };
 
+  const handleStopRide = async (ride) => {
+    if (!window.confirm("Are you sure you want to stop this ride? It will charge you based on current metrics.")) return;
+
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/rides/${ride._id}/end`, {
+        distanceKm: ride.distanceKm || 0,
+        timeMin: ride.timeMin || 0,
+        endLocation: ride.destination // Fallback since we don't have live location here
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Ride stopped successfully!");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to stop ride.");
+    }
+  };
+
+  const handleCancelRide = async (rideId) => {
+    if (!window.confirm("Are you sure you want to cancel? No charges will be applied.")) return;
+
+    try {
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideId}/cancel`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Ride cancelled successfully!");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to cancel ride.");
+    }
+  };
+
   return (
     <>
       <Header />
@@ -74,12 +108,26 @@ const MyRides = () => {
                     <td className="p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
                     <td className="p-4">
                       {ride.status === 'started' && (
-                        <button
-                          onClick={() => navigate(`/ride-tracking/${ride._id}`, { state: { ride } })}
-                          className="bg-black text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-800 transition-colors"
-                        >
-                          RESUME
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/ride-tracking/${ride._id}`, { state: { ride } })}
+                            className="bg-black text-white px-3 py-1 rounded text-sm font-bold hover:bg-gray-800 transition-colors"
+                          >
+                            RESUME
+                          </button>
+                          <button
+                            onClick={() => handleStopRide(ride)}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-sm font-bold hover:bg-red-700 transition-colors"
+                          >
+                            STOP
+                          </button>
+                          <button
+                            onClick={() => handleCancelRide(ride._id)}
+                            className="bg-gray-500 text-white px-3 py-1 rounded text-sm font-bold hover:bg-gray-600 transition-colors"
+                          >
+                            CANCEL
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
