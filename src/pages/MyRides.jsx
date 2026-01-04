@@ -3,10 +3,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../components/Contexts/authContext";
 
+import { useNavigate } from "react-router-dom";
+
 const MyRides = () => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user, token } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user && token) {
@@ -51,6 +54,7 @@ const MyRides = () => {
                   <th className="p-4 border">Distance</th>
                   <th className="p-4 border">Time</th>
                   <th className="p-4 border">Fare</th>
+                  <th className="p-4 border">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,6 +72,16 @@ const MyRides = () => {
                     <td className="p-4">{ride.finalDistanceKm || ride.distanceKm || 0} km</td>
                     <td className="p-4">{ride.finalDurationMin || ride.timeMin || 0} min</td>
                     <td className="p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
+                    <td className="p-4">
+                      {ride.status === 'started' && (
+                        <button
+                          onClick={() => navigate(`/ride-tracking/${ride._id}`, { state: { ride } })}
+                          className="bg-black text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-800 transition-colors"
+                        >
+                          RESUME
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
