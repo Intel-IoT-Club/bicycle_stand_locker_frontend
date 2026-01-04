@@ -8,27 +8,6 @@ export default function RegisterBikeModal({ open, onClose, onConfirm }) {
     const [lat, setLat] = useState("10.899481"); // Default to demo lat
     const [lng, setLng] = useState("76.900322"); // Default to demo lng
     const [loading, setLoading] = useState(false);
-    const [locLoading, setLocLoading] = useState(false);
-
-    const handleGetLocation = () => {
-        if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser");
-            return;
-        }
-        setLocLoading(true);
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                setLat(position.coords.latitude.toFixed(6));
-                setLng(position.coords.longitude.toFixed(6));
-                setLocLoading(false);
-            },
-            (error) => {
-                console.error(error);
-                alert("Unable to retrieve your location");
-                setLocLoading(false);
-            }
-        );
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -125,15 +104,6 @@ export default function RegisterBikeModal({ open, onClose, onConfirm }) {
                         />
                     </div>
                 </div>
-
-                <button
-                    type="button"
-                    onClick={handleGetLocation}
-                    disabled={locLoading}
-                    className="w-full py-2 bg-[#016766] text-white font-bold rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] transition-all uppercase text-xs tracking-widest"
-                >
-                    {locLoading ? "Fetching Location..." : "📍 Get Current Live Location"}
-                </button>
 
                 <div className="flex gap-4 pt-4">
                     <button

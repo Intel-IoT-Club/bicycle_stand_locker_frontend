@@ -12,7 +12,7 @@ const RideTracking = () => {
   const { state } = useLocation();
   const { ride, bike } = state || {};
   const navigate = useNavigate();
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   /* ---------------- UI STATE ---------------- */
   const [showPaymentSummary, setShowPaymentSummary] = useState(false);
   const [routeCoords, setRouteCoords] = useState([]);
@@ -411,7 +411,7 @@ const RideTracking = () => {
               </div>
 
               {showPinModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100 font-afacad">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] font-afacad">
                   <div className="bg-white p-8 rounded-2xl border-4 border-black w-80">
                     <h3 className="text-2xl font-bold mb-4">Enter Wallet PIN</h3>
                     <input
