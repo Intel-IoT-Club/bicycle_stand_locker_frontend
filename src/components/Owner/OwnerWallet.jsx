@@ -165,45 +165,86 @@ export default function OwnerWallet() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="bg-white border-b-2 border-gray-100">
-                                <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
-                                <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Rider</th>
-                                <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Amount</th>
-                                <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                                <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Reference ID</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {filteredRides.length === 0 ? (
-                                <tr><td colSpan="5" className="text-center py-10 text-gray-400">No transactions found</td></tr>
-                            ) : filteredRides.map((ride) => (
-                                <tr key={ride._id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-8 py-6 font-bold text-gray-700">
-                                        {new Date(ride.createdAt).toLocaleDateString()}
-                                        <div className="text-xs text-gray-400 font-normal">{new Date(ride.createdAt).toLocaleTimeString()}</div>
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <div className="font-bold">{ride.riderId?.userName || 'Unknown'}</div>
-                                        <div className="text-xs text-gray-400">{ride.riderId?.phone}</div>
-                                    </td>
-                                    <td className="px-8 py-6 font-bold text-black text-lg">
-                                        ₹{ride.finalFare?.toFixed(2) || ride.fare?.toFixed(2) || '0.00'}
-                                    </td>
-                                    <td className="px-8 py-6">
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${getStatusColor(getStatus(ride))}`}>
-                                            {getStatus(ride)}
-                                        </span>
-                                    </td>
-                                    <td className="px-8 py-6 text-right font-mono text-xs text-gray-400">
-                                        {ride._id.slice(-8).toUpperCase()}
-                                    </td>
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200">
+                    {/* Desktop Table */}
+                    <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-white border-b-2 border-gray-100">
+                                    <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Date</th>
+                                    <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Rider</th>
+                                    <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Amount</th>
+                                    <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                                    <th className="px-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Reference ID</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {filteredRides.length === 0 ? (
+                                    <tr><td colSpan="5" className="text-center py-10 text-gray-400">No transactions found</td></tr>
+                                ) : filteredRides.map((ride) => (
+                                    <tr key={ride._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-8 py-6 font-bold text-gray-700">
+                                            {new Date(ride.createdAt).toLocaleDateString()}
+                                            <div className="text-xs text-gray-400 font-normal">{new Date(ride.createdAt).toLocaleTimeString()}</div>
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <div className="font-bold">{ride.riderId?.userName || 'Unknown'}</div>
+                                            <div className="text-xs text-gray-400">{ride.riderId?.phone}</div>
+                                        </td>
+                                        <td className="px-8 py-6 font-bold text-black text-lg">
+                                            ₹{ride.finalFare?.toFixed(2) || ride.fare?.toFixed(2) || '0.00'}
+                                        </td>
+                                        <td className="px-8 py-6">
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${getStatusColor(getStatus(ride))}`}>
+                                                {getStatus(ride)}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-6 text-right font-mono text-xs text-gray-400">
+                                            {ride._id.slice(-8).toUpperCase()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden flex flex-col gap-4 p-4">
+                        {filteredRides.length === 0 ? (
+                            <div className="text-center py-10 text-gray-400">No transactions found</div>
+                        ) : filteredRides.map((ride) => (
+                            <div key={ride._id} className="bg-white border rounded-xl p-4 shadow-sm flex flex-col gap-3">
+                                <div className="flex justify-between items-start border-b pb-2">
+                                    <div>
+                                        <div className="font-bold text-lg">{ride.riderId?.userName || 'Unknown'}</div>
+                                        <div className="text-xs text-gray-500">{ride.riderId?.phone}</div>
+                                    </div>
+                                    <span className={`px-2 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border ${getStatusColor(getStatus(ride))}`}>
+                                        {getStatus(ride)}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                                    <div>
+                                        <span className="text-gray-500 block text-xs">Date</span>
+                                        {new Date(ride.createdAt).toLocaleDateString()}
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 block text-xs">Time</span>
+                                        {new Date(ride.createdAt).toLocaleTimeString()}
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 block text-xs">Amount</span>
+                                        <span className="font-bold text-black">₹{ride.finalFare?.toFixed(2) || ride.fare?.toFixed(2) || '0.00'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 block text-xs">Ref ID</span>
+                                        <span className="font-mono text-xs text-gray-400">{ride._id.slice(-8).toUpperCase()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

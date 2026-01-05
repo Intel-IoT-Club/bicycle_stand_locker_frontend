@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../components/Contexts/authContext';
 import OwnerStats from '../components/Owner/OwnerStats';
@@ -126,12 +127,14 @@ const OwnerDashboard = () => {
         { id: 'Wallet', label: 'Payouts' },
     ];
 
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
     if (!token) return null;
 
     return (
-        <div className="min-h-screen bg-[#F9F8E9] font-afacad text-black pb-20">
+        <div className="min-h-screen bg-[#F9F8E9] font-afacad text-black pb-20 pt-20">
             {/* Header Mirroring the Riders UI Header */}
-            <div className="flex justify-between px-4 lg:px-10 items-center w-full h-16 bg-black text-white sticky top-0 z-50 shadow-lg">
+            <div className="fixed top-0 left-0 right-0 z-[9999] bg-black text-white px-4 lg:px-10 h-16 flex justify-between items-center shadow-lg">
                 <div className="flex items-center gap-4">
                     <div className="cursor-pointer font-bold text-xl lg:text-2xl tracking-tighter text-[#00ff88]" onClick={() => navigate("/home")}>
                         AMRITA <span className="text-white">BRS</span>
@@ -141,50 +144,73 @@ const OwnerDashboard = () => {
                     </div>
                 </div>
 
-                <div className="flex gap-x-8 items-center">
-                    <div className="hidden md:flex gap-x-8">
-                        {navItems.map(item => (
-                            <div
-                                key={item.id}
-                                className={`cursor-pointer transition-all ${activeTab === item.id ? 'text-[#00ff88] font-bold' : 'hover:text-[#00ff88]'}`}
-                                onClick={() => setActiveTab(item.id)}
-                            >
-                                {item.label}
-                            </div>
-                        ))}
-                    </div>
+                {/* Desktop Nav */}
+                <div className="hidden md:flex gap-x-8 items-center">
+                    {navItems.map(item => (
+                        <div
+                            key={item.id}
+                            className={`cursor-pointer transition-all ${activeTab === item.id ? 'text-[#00ff88] font-bold' : 'hover:text-[#00ff88]'}`}
+                            onClick={() => setActiveTab(item.id)}
+                        >
+                            {item.label}
+                        </div>
+                    ))}
 
-                    <div className="flex items-center gap-x-3 border-l border-white/20 pl-4 lg:pl-8">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#016766] rounded-full flex items-center justify-center font-bold border-2 border-white/10 text-white text-sm lg:text-base">
+                    <div className="flex items-center gap-x-3 border-l border-white/20 pl-8">
+                        <div className="w-10 h-10 bg-[#016766] rounded-full flex items-center justify-center font-bold border-2 border-white/10 text-white">
                             {user?.userName?.charAt(0).toUpperCase() || "O"}
                         </div>
-                        <div className="hidden sm:block">
+                        <div>
                             <div className="text-sm font-bold leading-none">{user?.userName || 'Owner'}</div>
-                            <div className="text-[10px] text-gray-400">Main Administrator</div>
+                            <div className="text-[10px] text-gray-400">Administrator</div>
                         </div>
                     </div>
 
                     <button
                         onClick={handleLogout}
-                        className="bg-red-600 px-3 py-1.5 lg:px-4 rounded-lg text-xs lg:text-sm font-bold hover:bg-red-700 transition-colors shadow-lg"
+                        className="bg-red-600 px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-red-700 transition-colors shadow-lg"
                     >
                         Logout
                     </button>
                 </div>
+
+                {/* Mobile Hamburger */}
+                <div className="md:hidden flex items-center gap-4">
+                    <div className="w-8 h-8 bg-[#016766] rounded-full flex items-center justify-center font-bold border-2 border-white/10 text-white text-xs">
+                        {user?.userName?.charAt(0).toUpperCase() || "O"}
+                    </div>
+                    <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-white focus:outline-none">
+                        {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+                    </button>
+                </div>
             </div>
 
-            {/* Mobile Nav Bar */}
-            <div className="md:hidden flex overflow-x-auto bg-[#e5e4d3] px-4 py-3 gap-3 border-b border-black/5 no-scrollbar">
-                {navItems.map(item => (
-                    <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-bold transition-all ${activeTab === item.id ? 'bg-[#016766] text-white' : 'bg-white text-gray-600'}`}
-                    >
-                        {item.label}
-                    </button>
-                ))}
-            </div>
+            {/* Mobile Menu Dropdown */}
+            {isMobileMenuOpen && (
+                <div className="fixed top-16 left-0 w-full bg-black/95 backdrop-blur-sm border-t border-gray-800 z-[9998] shadow-xl md:hidden">
+                    <div className="flex flex-col px-6 py-6 gap-y-6">
+                        {navItems.map(item => (
+                            <div
+                                key={item.id}
+                                className={`text-xl font-medium cursor-pointer ${activeTab === item.id ? 'text-[#00ff88]' : 'text-gray-300'}`}
+                                onClick={() => {
+                                    setActiveTab(item.id);
+                                    setIsMobileMenuOpen(false);
+                                }}
+                            >
+                                {item.label}
+                            </div>
+                        ))}
+                        <div className="h-px bg-gray-800 w-full my-2"></div>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700 text-center"
+                        >
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content Area */}
             <main className="max-w-7xl mx-auto p-4 lg:p-10">
