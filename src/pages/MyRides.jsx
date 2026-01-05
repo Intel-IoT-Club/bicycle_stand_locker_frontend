@@ -6,27 +6,83 @@ import { useAuth } from "../components/Contexts/authContext";
 const MyRides = () => {
   const [rides, setRides] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
   const { user, token } = useAuth();
 
   useEffect(() => {
     if (user && token) {
-      const riderId = user._id || user.id;
-      axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rides?riderId=${riderId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then(res => {
-          setRides(res.data.rides || []);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error(err);
-          setLoading(false);
-        });
+      fetchRides();
     }
   }, [user, token]);
 
+  const fetchRides = () => {
+    const riderId = user._id || user.id;
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rides?riderId=${riderId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        setRides(res.data.rides || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  };
+
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleString();
+  };
+
+  const handleCancelRide = async (rideId) => {
+    if (!window.confirm("Are you sure you want to cancel this ride? No charges will be applied.")) {
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [rideId]: 'cancel' }));
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Ride cancelled successfully!");
+      fetchRides(); // Refresh the rides list
+    } catch (err) {
+      console.error("Cancel ride error:", err);
+      alert(err.response?.data?.error || "Failed to cancel ride");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [rideId]: null }));
+    }
+  };
+
+  const handleEndRide = async (rideId, ride) => {
+    if (!window.confirm("Are you sure you want to end this ride? Charges will be applied.")) {
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [rideId]: 'done' }));
+    try {
+      // Use current location or fallback to boarding location
+      const endLocation = ride.boarding;
+
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideId}/end`,
+        {
+          distanceKm: ride.distanceKm || 0,
+          timeMin: ride.timeMin || 0,
+          endLocation
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Ride ended successfully!");
+      fetchRides(); // Refresh the rides list
+    } catch (err) {
+      console.error("End ride error:", err);
+      alert(err.response?.data?.error || "Failed to end ride");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [rideId]: null }));
+    }
   };
 
   return (
@@ -45,31 +101,67 @@ const MyRides = () => {
               <thead>
                 <tr className="bg-[#016766] text-white text-xl lg:text-2xl">
                   <th className="p-4 border">S.no</th>
+                  <th className="p-4 border">Bicycle ID</th>
                   <th className="p-4 border">Date/Time</th>
                   <th className="p-4 border">Cycle</th>
                   <th className="p-4 border">Status</th>
                   <th className="p-4 border">Distance</th>
                   <th className="p-4 border">Time</th>
                   <th className="p-4 border">Fare</th>
+                  <th className="p-4 border">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {rides.map((ride, index) => (
-                  <tr key={ride._id} className="text-xl border-b hover:bg-gray-50">
-                    <td className="p-4">{index + 1}</td>
-                    <td className="p-4">{formatDate(ride.createdAt)}</td>
-                    <td className="p-4 font-mono">{ride.bikeName || "N/A"}</td>
-                    <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${ride.status === 'finished' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                        {ride.status}
-                      </span>
-                    </td>
-                    <td className="p-4">{ride.finalDistanceKm || ride.distanceKm || 0} km</td>
-                    <td className="p-4">{ride.finalDurationMin || ride.timeMin || 0} min</td>
-                    <td className="p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
-                  </tr>
-                ))}
+                {rides.map((ride, index) => {
+                  const isActive = ride.status === 'started';
+                  const isLoading = actionLoading[ride._id];
+
+                  return (
+                    <tr key={ride._id} className="text-xl border-b hover:bg-gray-50">
+                      <td className="p-4">{index + 1}</td>
+                      <td className="p-4 font-mono text-sm bg-gray-50 select-all">
+                        {ride.bikeId || "N/A"}
+                      </td>
+                      <td className="p-4">{formatDate(ride.createdAt)}</td>
+                      <td className="p-4 font-mono">{ride.bikeName || "N/A"}</td>
+                      <td className="p-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${ride.status === 'finished' ? 'bg-green-100 text-green-800' :
+                            ride.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {ride.status}
+                        </span>
+                      </td>
+                      <td className="p-4">{ride.finalDistanceKm || ride.distanceKm || 0} km</td>
+                      <td className="p-4">{ride.finalDurationMin || ride.timeMin || 0} min</td>
+                      <td className="p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleCancelRide(ride._id)}
+                            disabled={!isActive || isLoading}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!isActive || isLoading
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-red-500 text-white hover:bg-red-600 active:scale-95'
+                              }`}
+                          >
+                            {isLoading === 'cancel' ? 'Cancelling...' : 'Cancel'}
+                          </button>
+                          <button
+                            onClick={() => handleEndRide(ride._id, ride)}
+                            disabled={!isActive || isLoading}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!isActive || isLoading
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-500 text-white hover:bg-green-600 active:scale-95'
+                              }`}
+                          >
+                            {isLoading === 'done' ? 'Ending...' : 'Done'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
