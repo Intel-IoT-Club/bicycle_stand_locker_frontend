@@ -144,8 +144,8 @@ const BikeUnlock = () => {
   return (
     <>
       <Header />
-      <div className="max-h-screen bg-[#F9F8E9] font-afacad pt-20 pb-10 px-20 flex gap-5 h-screen">
-        <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+      <div className="min-h-screen bg-[#F9F8E9] font-afacad pt-24 pb-10 px-4 lg:px-20 flex flex-col lg:flex-row gap-5">
+        <div className="lg:flex-1 w-full h-[50vh] lg:h-auto bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden">
           <MapView
             boarding={boarding}
             destination={destination}

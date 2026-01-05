@@ -134,15 +134,15 @@ const Home = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#F9F8E9] pt-30 px-48 font-afacad m-0">
-        <div className="flex justify-between">
-          <div className="flex flex-col gap-y-8 w-1/3 ">
-            <div className="font-bold text-8xl ">Request A Ride</div>
+      <div className="min-h-screen bg-[#F9F8E9] pt-24 px-6 lg:px-48 font-afacad m-0">
+        <div className="flex flex-col-reverse lg:flex-row justify-between gap-10 lg:gap-0 pb-10">
+          <div className="flex flex-col gap-y-6 lg:gap-y-8 w-full lg:w-1/3">
+            <div className="font-bold text-5xl lg:text-8xl text-center lg:text-left">Request A Ride</div>
 
             {/* Boarding input */}
             <div className="relative" ref={boardingWrapperRef}>
-              <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center z-10 relative">
-                <img src={SearchIcon} className="h-8 w-8" />
+              <div className="p-3 lg:p-4 bg-[#787880]/16 rounded-3xl lg:rounded-4xl text-base pl-4 lg:pl-6 flex gap-x-3 lg:gap-x-4 items-center z-10 relative">
+                <img src={SearchIcon} className="h-6 w-6 lg:h-8 lg:w-8" />
                 <input
                   type="text"
                   name="boarding_point"
@@ -151,7 +151,7 @@ const Home = () => {
                   value={boarding}
                   onChange={handleBoardingChange}
                   onFocus={() => setShowBoardingSuggestions(true)}
-                  className="bg-transparent outline-none text-xl flex-1"
+                  className="bg-transparent outline-none text-lg lg:text-xl flex-1 w-full"
                   aria-label="Boarding Point"
                 />
               </div>
@@ -160,7 +160,7 @@ const Home = () => {
                   {boardingSuggestions.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-3 hover:bg-gray-100 cursor-pointer text-lg truncate border-b last:border-b-0 border-gray-100"
+                      className="p-3 hover:bg-gray-100 cursor-pointer text-base lg:text-lg truncate border-b last:border-b-0 border-gray-100"
                       onClick={() => selectSuggestion(item, setBoarding, setShowBoardingSuggestions, setBoardingSuggestions)}
                     >
                       {item.display_name}
@@ -172,8 +172,8 @@ const Home = () => {
 
             {/* Destination input */}
             <div className="relative" ref={destinationWrapperRef}>
-              <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center z-10 relative">
-                <img src={SearchIcon} className="h-8 w-8" />
+              <div className="p-3 lg:p-4 bg-[#787880]/16 rounded-3xl lg:rounded-4xl text-base pl-4 lg:pl-6 flex gap-x-3 lg:gap-x-4 items-center z-10 relative">
+                <img src={SearchIcon} className="h-6 w-6 lg:h-8 lg:w-8" />
                 <input
                   type="text"
                   name="destination_point"
@@ -182,7 +182,7 @@ const Home = () => {
                   value={destination}
                   onChange={handleDestinationChange}
                   onFocus={() => setShowDestinationSuggestions(true)}
-                  className="bg-transparent outline-none text-xl flex-1"
+                  className="bg-transparent outline-none text-lg lg:text-xl flex-1 w-full"
                   aria-label="Destination Point"
                 />
               </div>
@@ -191,7 +191,7 @@ const Home = () => {
                   {destinationSuggestions.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-3 hover:bg-gray-100 cursor-pointer text-lg truncate border-b last:border-b-0 border-gray-100"
+                      className="p-3 hover:bg-gray-100 cursor-pointer text-base lg:text-lg truncate border-b last:border-b-0 border-gray-100"
                       onClick={() => selectSuggestion(item, setDestination, setShowDestinationSuggestions, setDestinationSuggestions)}
                     >
                       {item.display_name}
@@ -202,10 +202,10 @@ const Home = () => {
             </div>
 
             {/* Custom clickable divs */}
-            <div className="flex w-full gap-8 text-center">
+            <div className="flex flex-col sm:flex-row w-full gap-4 lg:gap-8 text-center">
               <div
                 onClick={handleAbout}
-                className="p-4 flex-1 bg-[#016766] text-white rounded-md text-2xl relative overflow-hidden cursor-pointer"
+                className="p-3 lg:p-4 flex-1 bg-[#016766] text-white rounded-md text-xl lg:text-2xl relative overflow-hidden cursor-pointer shadow-md active:scale-95 transition-transform"
               >
                 About us
                 <div className="absolute inset-0 bg-white opacity-0 hover:opacity-25  transition-opacity rounded-md"></div>
@@ -213,7 +213,7 @@ const Home = () => {
 
               <div
                 onClick={handleSearch}
-                className="p-4 flex-1 bg-[#000000] text-white rounded-md text-2xl relative overflow-hidden cursor-pointer"
+                className="p-3 lg:p-4 flex-1 bg-[#000000] text-white rounded-md text-xl lg:text-2xl relative overflow-hidden cursor-pointer shadow-md active:scale-95 transition-transform"
               >
                 Search Rides
                 <div className="absolute inset-0 bg-white opacity-0 hover:opacity-25 transition-opacity rounded-md"></div>
@@ -221,8 +221,8 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="w-1/2">
-            <img src={HomeCycle} />
+          <div className="w-full lg:w-1/2 flex justify-center">
+            <img src={HomeCycle} className="max-w-full h-auto object-contain" />
           </div>
         </div>
       </div>

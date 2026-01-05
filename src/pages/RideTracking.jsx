@@ -374,15 +374,15 @@ const RideTracking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col items-center p-5">
+    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col items-center p-5 lg:px-20">
 
-      <div className="pb-6">
-        <div className="text-6xl font-bold text-center">{bikeName}</div>
+      <div className="pb-6 w-full">
+        <div className="text-4xl lg:text-6xl font-bold text-center truncate">{bikeName}</div>
       </div>
 
-      <div className="flex flex-row gap-5 w-full pr-20 pl-20">
+      <div className="flex flex-col lg:flex-row gap-5 w-full h-full">
 
-        <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+        <div className="w-full lg:flex-1 h-[40vh] lg:h-auto bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden relative">
           <MapView
             boarding={boardingLoc}
             destination={destinationLoc}
@@ -395,7 +395,7 @@ const RideTracking = () => {
           />
         </div>
 
-        <div className="flex-1 flex flex-col items-center gap-4">
+        <div className="w-full lg:flex-1 flex flex-col items-center gap-4">
 
           {showPaymentSummary ? (
             <div className="flex flex-col items-center gap-6">
