@@ -374,15 +374,15 @@ const RideTracking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col items-center p-5 lg:px-20">
+    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col items-center p-4 lg:p-10 lg:px-20">
 
-      <div className="pb-6 w-full">
-        <div className="text-4xl lg:text-6xl font-bold text-center truncate">{bikeName}</div>
+      <div className="pb-4 lg:pb-6 w-full">
+        <div className="text-3xl lg:text-6xl font-bold text-center truncate">{bikeName}</div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-5 w-full h-full">
+      <div className="flex flex-col lg:flex-row gap-5 w-full">
 
-        <div className="w-full lg:flex-1 h-[40vh] lg:h-auto bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden relative">
+        <div className="w-full lg:flex-1 h-[40vh] lg:h-[70vh] bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden relative">
           <MapView
             boarding={boardingLoc}
             destination={destinationLoc}
@@ -398,31 +398,31 @@ const RideTracking = () => {
         <div className="w-full lg:flex-1 flex flex-col items-center gap-4">
 
           {showPaymentSummary ? (
-            <div className="flex flex-col items-center gap-6">
+            <div className="flex flex-col items-center gap-6 w-full">
 
-              <h2 className="text-5xl font-bold mb-4">Payment Summary</h2>
+              <h2 className="text-3xl lg:text-5xl font-bold mb-4">Payment Summary</h2>
 
-              <div className="bg-black text-white text-3xl rounded-xl px-6 py-4 w-140">
+              <div className="bg-black text-white text-xl lg:text-3xl rounded-xl px-6 py-4 w-full lg:w-3/4">
                 <div>Bike ID: {bikeId}</div>
                 <div>Bike Name: {bikeName}</div>
                 <div>From: {fromAddress}</div>
                 <div>To: {toAddress}</div>
                 <div>Ride Time: {rideTimeDisplay}</div>
                 <div>Distance Covered: {distCoveredDisplay}</div>
-                <div className="text-4xl font-bold mt-4">Amount: ₹{price}</div>
+                <div className="text-3xl lg:text-4xl font-bold mt-4">Amount: ₹{price}</div>
               </div>
 
-              <div className="flex w-full gap-4 px-20">
+              <div className="flex flex-col lg:flex-row w-full gap-4 px-0 lg:px-10">
                 <button
-                  className={`flex-1 text-2xl font-bold py-4 rounded-xl transition-all border-2 border-black ${wallet?.balance >= livePrice ? "bg-[#016766] text-white hover:bg-[#015554]" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                  className={`flex-1 text-lg lg:text-2xl font-bold py-4 rounded-xl transition-all border-2 border-black ${wallet?.balance >= livePrice ? "bg-[#016766] text-white hover:bg-[#015554]" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
                   onClick={handleWalletPayment}
                   disabled={wallet?.balance < livePrice}
                 >
-                  PAY ₹{price} WITH WALLET (Bal: ₹{wallet?.balance?.toFixed(2) || "0"})
+                  PAY ₹{price} WITH WALLET <br className="lg:hidden" /> (Bal: ₹{wallet?.balance?.toFixed(2) || "0"})
                 </button>
 
                 <button
-                  className="flex-1 bg-white text-black border-2 border-black hover:bg-gray-50 text-2xl font-bold py-4 rounded-xl"
+                  className="flex-1 bg-white text-black border-2 border-black hover:bg-gray-50 text-lg lg:text-2xl font-bold py-4 rounded-xl"
                   onClick={handlePayment}
                 >
                   ONLINE PAYMENT
@@ -430,8 +430,8 @@ const RideTracking = () => {
               </div>
 
               {showPinModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100 font-afacad">
-                  <div className="bg-white p-8 rounded-2xl border-4 border-black w-80">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[200] font-afacad px-4">
+                  <div className="bg-white p-8 rounded-2xl border-4 border-black w-full max-w-sm">
                     <h3 className="text-2xl font-bold mb-4">Enter Wallet PIN</h3>
                     <input
                       type="password"
@@ -450,40 +450,41 @@ const RideTracking = () => {
             </div>
           ) : (
             <>
-              <div className="bg-black text-white text-xl rounded-xl px-6 py-4 w-140">
-                <div><b className="text-3xl">From:</b>&nbsp; {fromAddress}</div>
-                <div><b className="text-3xl">To:</b>&nbsp; {toAddress}</div>
+              <div className="bg-black text-white text-lg lg:text-xl rounded-xl px-4 lg:px-6 py-4 w-full lg:w-3/4">
+                <div className="mb-2"><b className="text-2xl lg:text-3xl block">From:</b> {fromAddress}</div>
+                <div><b className="text-2xl lg:text-3xl block">To:</b> {toAddress}</div>
               </div>
 
-              <div className="flex justify-center items-center gap-36 relative mt-18">
-                <div className="bg-black text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center z-20">
-                  <div>Ride Time</div>
-                  <div className="text-5xl font-bold">{rideTimeDisplay}</div>
+              {/* Stats Grid - Using Grid instead of absolute positioning for responsiveness */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 w-full mt-4">
+                <div className="bg-black text-white rounded-full aspect-square flex flex-col items-center justify-center p-2">
+                  <div className="text-sm lg:text-xl">Ride Time</div>
+                  <div className="text-2xl lg:text-5xl font-bold">{rideTimeDisplay}</div>
                 </div>
 
-                <div className="bg-[#016766] text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center absolute top-[-50px] left-1/2 transform -translate-x-1/2 z-10">
-                  <div>Time Left</div>
-                  <div className="text-5xl font-bold">
+                <div className="bg-[#016766] text-white rounded-full aspect-square flex flex-col items-center justify-center p-2 order-last lg:order-none col-span-2 lg:col-span-1 w-1/2 lg:w-full mx-auto">
+                  <div className="text-sm lg:text-xl">Time Left</div>
+                  <div className="text-2xl lg:text-5xl font-bold">
                     {timeLeftMin ? `${Math.ceil(timeLeftMin)} min` : "--"}
                   </div>
                 </div>
 
-                <div className="bg-black text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center ml-auto z-10">
-                  <div>Dist. Left</div>
-                  <div className="text-5xl font-bold">{distLeftDisplay}</div>
+                <div className="bg-black text-white rounded-full aspect-square flex flex-col items-center justify-center p-2">
+                  <div className="text-sm lg:text-xl">Dist. Left</div>
+                  <div className="text-2xl lg:text-5xl font-bold">{distLeftDisplay}</div>
                 </div>
               </div>
 
-              <div className="bg-[#016766] text-white text-center px-6 py-3 rounded-lg">
-                <div className="text-2xl">Dist. Covered: {distCoveredDisplay}</div>
-                <div className="text-4xl">Est. Fare: ₹{price}</div>
+              <div className="bg-[#016766] text-white text-center px-6 py-4 rounded-lg w-full lg:w-auto mt-4">
+                <div className="text-xl lg:text-2xl">Dist. Covered: {distCoveredDisplay}</div>
+                <div className="text-3xl lg:text-4xl font-bold mt-1">Est. Fare: ₹{price}</div>
               </div>
 
               <button
                 disabled={!canEndRide || rideEnded}
-                className={`text-white text-4xl font-bold px-36 py-6 rounded-lg
+                className={`text-white text-2xl lg:text-4xl font-bold w-full lg:w-auto px-8 lg:px-36 py-4 lg:py-6 rounded-lg mt-4 transition-colors
                   ${canEndRide && !rideEnded
-                    ? "bg-red-600 hover:bg-red-700"
+                    ? "bg-red-600 hover:bg-red-700 active:scale-95"
                     : "bg-gray-400 cursor-not-allowed"}`}
                 onClick={handleEndRide}
               >

@@ -21,7 +21,7 @@ const Header = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] bg-black text-white">
+    <div className="fixed top-0 left-0 right-0 z-[9999] bg-black text-white">
       <div className="flex justify-between items-center px-5 h-16 w-full max-w-7xl mx-auto">
         {/* Brand */}
         <div
