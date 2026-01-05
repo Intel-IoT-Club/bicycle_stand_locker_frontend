@@ -156,9 +156,9 @@ const RideSummary = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#F9F8E9] pt-18 px-48 font-afacad m-0">
-        <div className="flex flex-row justify-around">
-          <div className="flex flex-col gap-y-8 w-1/2 items-center">
+      <div className="min-h-screen bg-[#F9F8E9] pt-20 px-6 lg:px-48 font-afacad m-0 pb-10">
+        <div className="flex flex-col lg:flex-row justify-center">
+          <div className="flex flex-col gap-y-6 lg:gap-y-8 w-full lg:w-1/2 items-center">
             {/* Sub header */}
             <SuccessMessage />
 
@@ -166,7 +166,7 @@ const RideSummary = () => {
             <RideSummaryCard details={rideDetails} />
 
             {/* Buttons */}
-            <div className="flex w-4/5 gap-8">
+            <div className="flex flex-col sm:flex-row w-full gap-4 lg:gap-8">
               <Button>Wallet</Button>
               <Button onClick={handleDownloadInvoice}>Download Invoice</Button>
             </div>

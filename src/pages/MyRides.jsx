@@ -88,27 +88,27 @@ const MyRides = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#F9F8E9] pt-20 px-8 lg:px-20 font-afacad m-0 pb-10">
-        <div className="text-5xl lg:text-7xl font-bold mb-10 text-black">My Rides</div>
+      <div className="min-h-screen bg-[#F9F8E9] pt-20 px-4 lg:px-20 font-afacad m-0 pb-10">
+        <div className="text-4xl lg:text-7xl font-bold mb-6 lg:mb-10 text-black text-center lg:text-left">My Rides</div>
 
         {loading ? (
-          <div className="text-2xl text-center mt-20">Loading your rides...</div>
+          <div className="text-xl lg:text-2xl text-center mt-20">Loading your rides...</div>
         ) : rides.length === 0 ? (
-          <div className="text-2xl text-center mt-20">No rides found. Start your first ride!</div>
+          <div className="text-xl lg:text-2xl text-center mt-20">No rides found. Start your first ride!</div>
         ) : (
           <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[800px] lg:min-w-full">
               <thead>
-                <tr className="bg-[#016766] text-white text-xl lg:text-2xl">
-                  <th className="p-4 border">S.no</th>
-                  <th className="p-4 border">Bicycle ID</th>
-                  <th className="p-4 border">Date/Time</th>
-                  <th className="p-4 border">Cycle</th>
-                  <th className="p-4 border">Status</th>
-                  <th className="p-4 border">Distance</th>
-                  <th className="p-4 border">Time</th>
-                  <th className="p-4 border">Fare</th>
-                  <th className="p-4 border">Actions</th>
+                <tr className="bg-[#016766] text-white text-base lg:text-2xl">
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">S.no</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Bicycle ID</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Date/Time</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Cycle</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Status</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Distance</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Time</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Fare</th>
+                  <th className="p-3 lg:p-4 border whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,32 +117,32 @@ const MyRides = () => {
                   const isLoading = actionLoading[ride._id];
 
                   return (
-                    <tr key={ride._id} className="text-xl border-b hover:bg-gray-50">
-                      <td className="p-4">{index + 1}</td>
-                      <td className="p-4 font-mono text-sm bg-gray-50 select-all">
+                    <tr key={ride._id} className="text-base lg:text-xl border-b hover:bg-gray-50">
+                      <td className="p-3 lg:p-4">{index + 1}</td>
+                      <td className="p-3 lg:p-4 font-mono text-sm bg-gray-50 select-all">
                         {ride.bikeId || "N/A"}
                       </td>
-                      <td className="p-4">{formatDate(ride.createdAt)}</td>
-                      <td className="p-4 font-mono">{ride.bikeName || "N/A"}</td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${ride.status === 'finished' ? 'bg-green-100 text-green-800' :
-                            ride.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                              'bg-yellow-100 text-yellow-800'
+                      <td className="p-3 lg:p-4 whitespace-nowrap">{formatDate(ride.createdAt)}</td>
+                      <td className="p-3 lg:p-4 font-mono">{ride.bikeName || "N/A"}</td>
+                      <td className="p-3 lg:p-4">
+                        <span className={`px-2 py-1 lg:px-3 lg:py-1 rounded-full text-xs lg:text-sm font-semibold whitespace-nowrap ${ride.status === 'finished' ? 'bg-green-100 text-green-800' :
+                          ride.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
                           }`}>
                           {ride.status}
                         </span>
                       </td>
-                      <td className="p-4">{ride.finalDistanceKm || ride.distanceKm || 0} km</td>
-                      <td className="p-4">{ride.finalDurationMin || ride.timeMin || 0} min</td>
-                      <td className="p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4 whitespace-nowrap">{ride.finalDistanceKm || ride.distanceKm || 0} km</td>
+                      <td className="p-3 lg:p-4 whitespace-nowrap">{ride.finalDurationMin || ride.timeMin || 0} min</td>
+                      <td className="p-3 lg:p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
+                      <td className="p-3 lg:p-4">
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleCancelRide(ride._id)}
                             disabled={!isActive || isLoading}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!isActive || isLoading
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : 'bg-red-500 text-white hover:bg-red-600 active:scale-95'
+                            className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm transition-all whitespace-nowrap ${!isActive || isLoading
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-red-500 text-white hover:bg-red-600 active:scale-95'
                               }`}
                           >
                             {isLoading === 'cancel' ? 'Cancelling...' : 'Cancel'}
@@ -150,9 +150,9 @@ const MyRides = () => {
                           <button
                             onClick={() => handleEndRide(ride._id, ride)}
                             disabled={!isActive || isLoading}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!isActive || isLoading
-                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : 'bg-green-500 text-white hover:bg-green-600 active:scale-95'
+                            className={`px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg font-semibold text-xs lg:text-sm transition-all whitespace-nowrap ${!isActive || isLoading
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : 'bg-green-500 text-white hover:bg-green-600 active:scale-95'
                               }`}
                           >
                             {isLoading === 'done' ? 'Ending...' : 'Done'}

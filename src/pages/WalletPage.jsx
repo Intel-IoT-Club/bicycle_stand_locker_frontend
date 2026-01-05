@@ -317,7 +317,7 @@ export default function WalletPage() {
                 </div>
             </div>
 
-            <main className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <main className="max-w-6xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 pb-24 lg:pb-6">
 
                 {/* Left Column: Balance Card */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
@@ -361,8 +361,8 @@ export default function WalletPage() {
                 </div>
 
                 {/* Right Column: Transactions */}
-                <div className="lg:col-span-7">
-                    <div className=" rounded-2xl border-2 border-gray-300 p-6 h-full">
+                <div className="lg:col-span-7 h-full">
+                    <div className="rounded-2xl border-2 border-gray-300 p-4 lg:p-6 h-full min-h-[500px]">
                         <TransactionList
                             transactions={filteredTransactions}
                             onSync={() => pushNotification("info", "Sync started")}
