@@ -9,7 +9,7 @@ import Modal from "../ui/Modal.jsx";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../components/Contexts/authContext";
 import ToastManager, { notify } from "../ui/toastManager";
-import Header from "../components/Header";
+import WalletHeader from "../components/wallet/Header";
 
 const BACKEND = import.meta.env.VITE_API_BASE_URL;
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -42,7 +42,7 @@ function fireConfetti() {
 }
 
 export default function WalletPage() {
-    const { user, token } = useAuth();
+    const { user } = useAuth();
     const navigate = useNavigate();
     const [balance, setBalance] = useState(0);
     const [transactions, setTransactions] = useState([]);
@@ -51,11 +51,8 @@ export default function WalletPage() {
         if (!user) return;
         async function fetchWallet() {
             try {
-                const res = await fetch(`${BACKEND}/api/wallet/${user._id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }); const contentType = res.headers.get('content-type') || '';
+                const res = await fetch(`${BACKEND}/api/wallet/${user._id}`);
+                const contentType = res.headers.get('content-type') || '';
                 if (!res.ok) {
                     const txt = await res.text();
                     throw new Error(`Wallet fetch failed: ${res.status} ${txt}`);
@@ -92,8 +89,7 @@ export default function WalletPage() {
     useEffect(() => {
         let cancelled = false;
         async function checkBackend() {
-            // Check strictly for undefined, allow empty string (proxy)
-            if (BACKEND === undefined) {
+            if (!BACKEND) {
                 setBackendConnected(false);
                 return;
             }
@@ -128,10 +124,7 @@ export default function WalletPage() {
         const url = `${BACKEND}/api/payments/create-order`;
         const res = await fetch(url, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ amount }),
         });
         if (!res.ok) {
@@ -147,10 +140,7 @@ export default function WalletPage() {
         const userId = user?._id || user?.id;
         const res = await fetch(url, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 razorpay_order_id: payload.razorpay_order_id,
                 razorpay_payment_id: payload.razorpay_payment_id,
@@ -250,10 +240,7 @@ export default function WalletPage() {
             try {
                 await fetch(`${BACKEND}/api/wallet/${user._id}/pin`, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ pin: pinInput }),
                 });
                 pushNotification("success", "Wallet PIN set and saved");
@@ -290,141 +277,98 @@ export default function WalletPage() {
     });
 
     return (
-        <div className="min-h-screen bg-[#F9F8E9] font-afacad text-black pb-32">
+        <div className="min-h-screen bg-[#F9F8E9] font-afacad text-black">
             <div id="confetti-root"></div>
+
+
             <ToastManager />
-            <Header />
 
-            <div className="max-w-7xl mx-auto pt-28 px-4 sm:px-6 lg:px-8">
+            <WalletHeader
+                userName={user?.userName}
+                onNotificationClick={() => setNotifOpen(true)}
+                onProfileClick={() => navigate('/profile')}
+            />
 
-                {/* Hero Section */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
-                    <div>
-                        <h1 className="text-6xl lg:text-8xl font-black uppercase tracking-tighter">
-                            My <span className="text-[#016766]">Wallet</span>
-                        </h1>
-                        <p className="text-xl font-bold text-gray-500 uppercase tracking-widest mt-2 ml-1">
-                            Safe & Fast Digital Payments
-                        </p>
-                    </div>
+            <div className="max-w-6xl mx-auto p-4 flex items-center justify-between">
+                <button onClick={() => navigate('/home')} className="px-6 py-2 rounded-xl border-2 border-black bg-white text-black font-bold hover:bg-gray-50 transition-colors">
+                    ← Back to Home
+                </button>
 
-                    <div className="flex items-center gap-3 bg-white px-5 py-2 rounded-2xl border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                        <div className={`w-3 h-3 rounded-full animate-pulse ${backendConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <span className="font-black uppercase text-xs tracking-widest">
-                            System: {backendConnected ? 'Online' : 'Offline'}
-                        </span>
+                {/* Backend Indicator */}
+                <div className="flex items-center gap-2 text-sm font-medium bg-white px-3 py-1 rounded-full border border-gray-300">
+                    <div className={`w-3 h-3 rounded-full ${backendConnected === null ? 'bg-yellow-400' : backendConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                    <span className="text-gray-600">{backendConnected === null ? 'Checking...' : backendConnected ? 'Online' : 'Offline'}</span>
+                </div>
+            </div>
+
+            <main className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                {/* Left Column: Balance Card */}
+                <div className="lg:col-span-5 flex flex-col gap-6">
+                    <WalletBalance
+                        balance={balance}
+                        threshold={threshold}
+                        onRechargeClick={() => setRechargeOpen(true)}
+                        autoRecharge={autoRecharge}
+                        onAutoRechargeChange={(val) => {
+                            setAutoRecharge(val);
+                            updateSettings(val, threshold);
+                        }}
+                        onThresholdChange={(val) => {
+                            setThreshold(val);
+                            updateSettings(autoRecharge, val);
+                        }}
+                        onSetPin={() => setPinOpen(true)}
+                    />
+
+                    {balance < 50 && (
+                        <div className="bg-red-100 border-2 border-red-500 rounded-xl p-4 flex items-center gap-3 animate-pulse">
+                            <span className="text-2xl">⚠️</span>
+                            <div>
+                                <p className="font-bold text-red-700">Low Balance Warning</p>
+                                <p className="text-sm text-red-600 font-medium">Please top up at least ₹50 for seamless rides.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-[#016766] text-white rounded-xl p-4 border-2 border-black shadow-sm">
+                            <p className="text-lg font-semibold opacity-90">Saved Method</p>
+                            <p className="text-sm mt-1 opacity-75">No card saved</p>
+                        </div>
+                        <div className="bg-white text-black rounded-xl p-4 border-2 border-black shadow-sm">
+                            <p className="text-lg font-semibold text-[#016766]">Quick Alerts</p>
+                            <p className="text-sm mt-1 text-gray-600">Low balance • Rides</p>
+                        </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
-                    {/* Left Side: Balance & Quick Actions */}
-                    <div className="lg:col-span-5 flex flex-col gap-8">
-
-                        {/* Balance Card */}
-                        <div className="bg-black text-white p-8 rounded-[40px] border-4 border-[#016766] shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-[#016766] rounded-full blur-[80px] opacity-50 group-hover:opacity-100 transition-opacity"></div>
-
-                            <div className="relative z-10">
-                                <div className="text-xs font-black uppercase tracking-[0.3em] text-gray-400 mb-2">Available Balance</div>
-                                <div className="text-6xl lg:text-7xl font-black italic tracking-tighter mb-8 tabular-nums">
-                                    ₹{balance?.toFixed(2)}
-                                </div>
-
-                                <div className="flex flex-wrap gap-4">
-                                    <button
-                                        onClick={() => setRechargeOpen(true)}
-                                        className="bg-[#016766] text-white px-8 py-4 rounded-2xl font-black uppercase italic border-2 border-white/20 hover:bg-[#015554] active:scale-95 transition-all shadow-xl"
-                                    >
-                                        + Recharge
-                                    </button>
-                                    <button
-                                        onClick={() => setPinOpen(true)}
-                                        className="bg-white/10 text-white px-8 py-4 rounded-2xl font-black uppercase border-2 border-white/20 hover:bg-white/20 active:scale-95 transition-all"
-                                    >
-                                        {walletPin ? 'Update PIN' : 'Set PIN'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Low Balance Alert */}
-                        {balance < 50 && (
-                            <div className="bg-orange-50 p-6 rounded-3xl border-4 border-black border-dashed flex items-center gap-6 animate-in slide-in-from-left duration-500">
-                                <span className="text-4xl">⚠️</span>
-                                <div>
-                                    <h3 className="font-black uppercase text-lg">Low Balance</h3>
-                                    <p className="font-bold text-gray-600 text-sm">Add funds for frictionless ride starts.</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Settings Card */}
-                        <div className="bg-white p-6 lg:p-10 rounded-[40px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                            <h3 className="text-2xl font-black uppercase tracking-tighter mb-8 italic">Wallet Settings</h3>
-
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border-2 border-black">
-                                    <div>
-                                        <div className="font-black uppercase text-sm">Auto Recharge</div>
-                                        <div className="text-xs font-bold text-gray-500">Auto-topup when low</div>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={autoRecharge}
-                                        onChange={(e) => {
-                                            const val = e.target.checked;
-                                            setAutoRecharge(val);
-                                            updateSettings(val, threshold);
-                                        }}
-                                        className="w-10 h-10 accent-[#016766] cursor-pointer"
-                                    />
-                                </div>
-
-                                <div className="p-4 bg-yellow-50 rounded-2xl border-2 border-black">
-                                    <div className="flex justify-between mb-2">
-                                        <div className="font-black uppercase text-sm">Low Alert Threshold</div>
-                                        <div className="font-black text-[#016766]">₹{threshold}</div>
-                                    </div>
-                                    <input
-                                        type="range"
-                                        min="10"
-                                        max="200"
-                                        step="10"
-                                        value={threshold}
-                                        onChange={(e) => {
-                                            const val = parseInt(e.target.value);
-                                            setThreshold(val);
-                                            updateSettings(autoRecharge, val);
-                                        }}
-                                        className="w-full h-4 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                {/* Right Column: Transactions */}
+                <div className="lg:col-span-7">
+                    <div className=" rounded-2xl border-2 border-gray-300 p-6 h-full">
+                        <TransactionList
+                            transactions={filteredTransactions}
+                            onSync={() => pushNotification("info", "Sync started")}
+                            onExport={() => pushNotification("success", "Exported transactions.csv")}
+                            onSearch={setQ}
+                            onFilter={setFilter}
+                            filter={filter}
+                            q={q}
+                        />
                     </div>
+                </div>
+            </main>
 
-                    {/* Right Side: Transactions */}
-                    <div className="lg:col-span-7">
-                        <div className="bg-white p-6 lg:p-10 rounded-[40px] border-4 border-black shadow-[8px_8px_0px_0px_rgba(1,103,102,1)] h-full overflow-hidden flex flex-col">
-                            <h3 className="text-2xl font-black uppercase tracking-tighter mb-8 italic flex items-center gap-3">
-                                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white text-sm">📜</div>
-                                Activity Feed
-                            </h3>
-
-                            <div className="flex-1 overflow-y-auto">
-                                <TransactionList
-                                    transactions={filteredTransactions}
-                                    onSync={() => pushNotification("info", "Syncing transactions...")}
-                                    onExport={() => pushNotification("success", "Export started")}
-                                    onSearch={setQ}
-                                    onFilter={setFilter}
-                                    filter={filter}
-                                    q={q}
-                                />
-                            </div>
-                        </div>
-                    </div>
+            {/* Mobile Bottom Nav */}
+            <div className="fixed bottom-6 left-0 right-0 flex justify-center pointer-events-auto z-50">
+                <div className="bg-black text-white rounded-full shadow-xl px-6 py-3 flex gap-6 border-2 border-[#016766]">
+                    <NavLink to="/home" className={({ isActive }) => `flex flex-col items-center ${isActive ? 'text-[#016766]' : 'text-white'}`}>
+                        <span className="text-xl">🏠</span>
+                    </NavLink>
+                    <NavLink to="/wallet" className={({ isActive }) => `flex flex-col items-center ${isActive ? 'text-[#016766]' : 'text-white'}`}>
+                        <span className="text-xl">💰</span>
+                    </NavLink>
                 </div>
             </div>
 
@@ -440,24 +384,18 @@ export default function WalletPage() {
                 onPinSubmit={handlePinSubmit}
                 walletPin={walletPin}
             />
-
             <Modal
                 open={notifOpen}
                 onClose={() => setNotifOpen(false)}
-                title="System Notifications"
-                contentClassName="bg-white border-4 border-black rounded-3xl"
+                title="Notifications"
+                contentClassName="bg-white text-black border-2 border-black rounded-xl"
             >
-                <div className="space-y-4 max-h-96 overflow-y-auto p-2">
-                    {notifications.length === 0 && (
-                        <div className="text-center py-10">
-                            <div className="text-4xl mb-4">🔔</div>
-                            <p className="font-black uppercase text-gray-400">All caught up!</p>
-                        </div>
-                    )}
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {notifications.length === 0 && <p className="text-center text-gray-500 py-4">No new notifications</p>}
                     {notifications.map((n) => (
-                        <div key={n.id} className={`p-4 rounded-2xl border-2 border-black flex flex-col gap-1 ${n.type === 'success' ? 'bg-green-50' : 'bg-gray-50'}`}>
-                            <p className="font-black uppercase text-sm italic">{n.text}</p>
-                            <p className="text-[10px] font-bold text-gray-400">{n.time}</p>
+                        <div key={n.id} className={`p-3 rounded-lg border ${n.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                            <p className="text-sm font-bold">{n.text}</p>
+                            <p className="text-xs text-gray-500">{n.time}</p>
                         </div>
                     ))}
                 </div>

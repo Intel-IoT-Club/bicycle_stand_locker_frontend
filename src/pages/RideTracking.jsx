@@ -111,8 +111,7 @@ const RideTracking = () => {
         const [lng, lat] = routeCoords[index];
         axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/api/cycles/${bike._id}/location`,
-          { lat, lng },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { lat, lng }
         );
         index += 1;
       }, 5000); // simulate movement every 5 sec
@@ -126,8 +125,7 @@ const RideTracking = () => {
               {
                 lat: pos.coords.latitude,
                 lng: pos.coords.longitude,
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
+              }
             );
           },
           (err) => {
@@ -148,8 +146,7 @@ const RideTracking = () => {
 
     const interval = setInterval(async () => {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/cycles/${bike._id}/location`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        `${import.meta.env.VITE_API_BASE_URL}/api/cycles/${bike._id}/location`
       );
       setCurrentLocation(res.data.location);
     }, 5000);
@@ -166,7 +163,7 @@ const RideTracking = () => {
         boarding: boardingLoc,
         bike,
         destination: destinationLoc,
-      }, { headers: { Authorization: `Bearer ${token}` } })
+      })
       .then((res) => setRouteCoords(res.data.geometry || []));
   }, [ride?._id]);
 
@@ -225,8 +222,7 @@ const RideTracking = () => {
     const interval = setInterval(async () => {
       const res = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/rides/${ride._id}/update-metrics`,
-        { distanceKm: distanceCovered, timeMin: rideTimeMin },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { distanceKm: distanceCovered, timeMin: rideTimeMin }
       );
       setLivePrice(res.data.fare);
     }, 15000);
@@ -239,9 +235,7 @@ const RideTracking = () => {
     if (!user?._id) return;
     const fetchWallet = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`);
         setWallet(res.data);
       } catch (err) {
         console.error("Failed to fetch wallet:", err);
@@ -295,8 +289,7 @@ const RideTracking = () => {
           amount: livePrice,
           rideId: ride._id,
           pin: pinInput
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+        }
       );
 
       if (res.data.success) {
@@ -311,8 +304,7 @@ const RideTracking = () => {
   const handlePayment = async () => {
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
-      { amount: livePrice },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { amount: livePrice }
     );
 
     const { order } = response.data;
@@ -331,8 +323,7 @@ const RideTracking = () => {
             {
               response,
               ride
-            },
-            { headers: { Authorization: `Bearer ${token}` } }
+            }
           );
 
           // 3️⃣ Redirect ONLY after backend success
@@ -364,132 +355,122 @@ const RideTracking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col pt-16">
-      <Header />
+    <div className="min-h-screen bg-[#F9F8E9] font-afacad flex flex-col items-center p-5">
 
-      {/* Main Container */}
-      <div className="flex-1 flex flex-col lg:flex-row p-4 lg:p-10 gap-6">
+      <div className="pb-6">
+        <div className="text-6xl font-bold text-center">{bikeName}</div>
+      </div>
 
-        {/* Left Side: Map Tracking */}
-        <div className="lg:w-2/3 h-[400px] lg:h-auto bg-white rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden relative">
+      <div className="flex flex-row gap-5 w-full pr-20 pl-20">
+
+        <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
           <MapView
             boarding={boardingLoc}
             destination={destinationLoc}
-            cycles={bike ? [bike] : []}
+            cycles={currentLocation ? [{ ...bike, location: { coordinates: [currentLocation.lng, currentLocation.lat] } }] : [bike]}
             selectedBikeId={bike?._id}
             onSelectBike={() => { }}
             routeCoords={routeCoords}
-            currentLocation={currentLocation}
+            bikeDistance={null}
+          //currentLocation={currentLocation}
           />
-
-          {/* Floating Stats on Map */}
-          <div className="absolute top-4 left-4 right-4 flex flex-col sm:flex-row gap-2 pointer-events-none">
-            <div className="bg-black text-white px-4 py-2 rounded-xl text-sm font-black uppercase tracking-tighter shadow-lg border-2 border-[#016766]">
-              Live: {bikeName}
-            </div>
-            <div className="bg-[#016766] text-white px-4 py-2 rounded-xl text-sm font-black uppercase tracking-tighter shadow-lg border-2 border-black">
-              Fare: ₹{livePrice?.toFixed(2)}
-            </div>
-          </div>
         </div>
 
-        {/* Right Side: Ride Dashboard */}
-        <div className="lg:w-1/3 flex flex-col gap-6">
+        <div className="flex-1 flex flex-col items-center gap-4">
 
           {showPaymentSummary ? (
-            /* PAYMENT OVERLAY CARD */
-            <div className="bg-white p-8 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(1,103,102,1)] animate-in zoom-in duration-300">
-              <h2 className="text-4xl font-black uppercase tracking-tighter mb-6 text-center">Receipt</h2>
+            <div className="flex flex-col items-center gap-6">
 
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between border-b-2 border-gray-100 pb-2">
-                  <span className="text-gray-500 font-bold uppercase text-xs">Distance</span>
-                  <span className="font-black">{distCoveredDisplay}</span>
-                </div>
-                <div className="flex justify-between border-b-2 border-gray-100 pb-2">
-                  <span className="text-gray-500 font-bold uppercase text-xs">Time</span>
-                  <span className="font-black">{rideTimeDisplay}</span>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-xl border-2 border-dashed border-black">
-                  <div className="text-center text-sm font-bold text-[#016766] uppercase mb-1">Total Paid</div>
-                  <div className="text-4xl font-black text-center italic">₹{livePrice?.toFixed(2)}</div>
-                </div>
+              <h2 className="text-5xl font-bold mb-4">Payment Summary</h2>
+
+              <div className="bg-black text-white text-3xl rounded-xl px-6 py-4 w-140">
+                <div>Bike ID: {bikeId}</div>
+                <div>Bike Name: {bikeName}</div>
+                <div>From: {fromAddress}</div>
+                <div>To: {toAddress}</div>
+                <div>Ride Time: {rideTimeDisplay}</div>
+                <div>Distance Covered: {distCoveredDisplay}</div>
+                <div className="text-4xl font-bold mt-4">Amount: ₹{price}</div>
               </div>
 
-              <div className="flex flex-col gap-4">
+              <div className="flex w-full gap-4 px-20">
                 <button
-                  className="w-full bg-[#016766] py-4 rounded-2xl text-xl font-black text-white uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
-                  onClick={() => navigate(`/ride-summary/${ride?._id || bikeId}`)}
+                  className={`flex-1 text-2xl font-bold py-4 rounded-xl transition-all border-2 border-black ${wallet?.balance >= livePrice ? "bg-[#016766] text-white hover:bg-[#015554]" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                  onClick={handleWalletPayment}
+                  disabled={wallet?.balance < livePrice}
                 >
-                  View Final Details
+                  PAY WITH WALLET (₹{wallet?.balance?.toFixed(2) || "0"})
+                </button>
+
+                <button
+                  className="flex-1 bg-white text-black border-2 border-black hover:bg-gray-50 text-2xl font-bold py-4 rounded-xl"
+                  onClick={handlePayment}
+                >
+                  ONLINE PAYMENT
                 </button>
               </div>
-            </div>
-          ) : (
-            /* ACTIVE RIDE CARD */
-            <div className="flex flex-col gap-6">
 
-              <div className="bg-black text-white p-6 rounded-3xl border-4 border-[#016766] shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="bg-[#016766] p-3 rounded-2xl border-2 border-white">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-xs font-black uppercase tracking-widest text-gray-400">Time Elapsed</div>
-                    <div className="text-4xl font-black italic tabular-nums">{rideTimeDisplay}</div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-white/10 p-4 rounded-2xl border border-white/20">
-                    <div className="text-[10px] font-black uppercase text-gray-400">ETA</div>
-                    <div className="text-xl font-black text-[#016766]">
-                      {timeLeftMin ? `${Math.ceil(timeLeftMin)}m` : "--"}
+              {showPinModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100 font-afacad">
+                  <div className="bg-white p-8 rounded-2xl border-4 border-black w-80">
+                    <h3 className="text-2xl font-bold mb-4">Enter Wallet PIN</h3>
+                    <input
+                      type="password"
+                      maxLength={4}
+                      value={pinInput}
+                      onChange={(e) => setPinInput(e.target.value)}
+                      className="w-full text-center text-4xl tracking-widest border-2 border-gray-300 rounded-lg py-2 mb-6"
+                    />
+                    <div className="flex gap-4">
+                      <button onClick={() => setShowPinModal(false)} className="flex-1 font-bold py-2 rounded-lg border-2 border-black">Cancel</button>
+                      <button onClick={handleWalletPayment} className="flex-1 bg-black text-white font-bold py-2 rounded-lg">Confirm</button>
                     </div>
                   </div>
-                  <div className="bg-white/10 p-4 rounded-2xl border border-white/20">
-                    <div className="text-[10px] font-black uppercase text-gray-400">Distance</div>
-                    <div className="text-xl font-black text-white">{distCoveredDisplay}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ROUTE CARD */}
-              <div className="bg-white p-6 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-                <div className="relative pl-8 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-1 before:border-l-2 before:border-dashed before:border-gray-300">
-                  <div className="relative">
-                    <div className="absolute -left-10 top-1 w-6 h-6 rounded-full bg-white border-4 border-green-500 z-10"></div>
-                    <div className="text-[10px] font-black uppercase text-gray-400">Pick up</div>
-                    <div className="text-sm font-bold truncate">{fromAddress}</div>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute -left-10 top-1 w-6 h-6 rounded-full bg-white border-4 border-red-500 z-10"></div>
-                    <div className="text-[10px] font-black uppercase text-gray-400">Drop off</div>
-                    <div className="text-sm font-bold truncate">{toAddress}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ACTION BUTTON */}
-              <button
-                className={`w-full py-5 rounded-3xl text-2xl font-black uppercase tracking-tighter transition-all border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none ${canEndRide
-                  ? "bg-[#016766] text-white hover:bg-[#015554]"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300 shadow-none translate-y-1"
-                  }`}
-                onClick={handleEndRide}
-                disabled={!canEndRide}
-              >
-                {canEndRide ? "End Ride" : "Getting Closer..."}
-              </button>
-
-              {!canEndRide && (
-                <div className="text-center text-xs font-black uppercase text-red-500 animate-pulse">
-                  Reach destination to end ride
                 </div>
               )}
             </div>
+          ) : (
+            <>
+              <div className="bg-black text-white text-xl rounded-xl px-6 py-4 w-140">
+                <div><b className="text-3xl">From:</b>&nbsp; {fromAddress}</div>
+                <div><b className="text-3xl">To:</b>&nbsp; {toAddress}</div>
+              </div>
+
+              <div className="flex justify-center items-center gap-36 relative mt-18">
+                <div className="bg-black text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center z-20">
+                  <div>Ride Time</div>
+                  <div className="text-5xl font-bold">{rideTimeDisplay}</div>
+                </div>
+
+                <div className="bg-[#016766] text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center absolute top-[-50px] left-1/2 transform -translate-x-1/2 z-10">
+                  <div>Time Left</div>
+                  <div className="text-5xl font-bold">
+                    {timeLeftMin ? `${Math.ceil(timeLeftMin)} min` : "--"}
+                  </div>
+                </div>
+
+                <div className="bg-black text-white text-3xl rounded-full w-48 h-48 flex flex-col items-center justify-center ml-auto z-10">
+                  <div>Dist. Left</div>
+                  <div className="text-5xl font-bold">{distLeftDisplay}</div>
+                </div>
+              </div>
+
+              <div className="bg-[#016766] text-white text-center px-6 py-3 rounded-lg">
+                <div className="text-2xl">Dist. Covered: {distCoveredDisplay}</div>
+                <div className="text-4xl">Est. Fare: ₹{price}</div>
+              </div>
+
+              <button
+                disabled={!canEndRide || rideEnded}
+                className={`text-white text-4xl font-bold px-36 py-6 rounded-lg
+                  ${canEndRide && !rideEnded
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-gray-400 cursor-not-allowed"}`}
+                onClick={handleEndRide}
+              >
+                {rideEnded ? "RIDE ENDED" : "END RIDE"}
+              </button>
+            </>
           )}
         </div>
       </div>
