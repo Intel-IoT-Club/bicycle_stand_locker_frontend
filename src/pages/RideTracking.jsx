@@ -418,7 +418,7 @@ const RideTracking = () => {
                   onClick={handleWalletPayment}
                   disabled={wallet?.balance < livePrice}
                 >
-                  PAY WITH WALLET (₹{wallet?.balance?.toFixed(2) || "0"})
+                  PAY ₹{price} WITH WALLET (Bal: ₹{wallet?.balance?.toFixed(2) || "0"})
                 </button>
 
                 <button
