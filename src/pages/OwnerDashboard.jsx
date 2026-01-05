@@ -42,7 +42,7 @@ const OwnerDashboard = () => {
     useEffect(() => {
         if (!token) return;
         fetchData();
-        const interval = setInterval(fetchData, 30000);
+        const interval = setInterval(fetchData, 3000);
         return () => clearInterval(interval);
     }, [token]);
 

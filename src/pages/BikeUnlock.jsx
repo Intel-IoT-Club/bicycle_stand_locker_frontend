@@ -113,21 +113,28 @@ const BikeUnlock = () => {
   }, []);
 
   useEffect(() => {
-
     if (!boarding || !destination) {
       setLoading(false);
       return;
     }
 
-    axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/search`, { boarding, destination })
-      .then((res) => {
-        setCycles(res.data.cycles || [])
-      })
-      .catch((err) => {
-        console.error(err);
-        setCycles([]);
-      })
-      .finally(() => setLoading(false));
+    const fetchCycles = () => {
+      axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/cycles/search`, { boarding, destination })
+        .then((res) => {
+          setCycles(res.data.cycles || [])
+        })
+        .catch((err) => {
+          console.error(err);
+          // Don't clear cycles on error to avoid flickering if one request fails
+        })
+        .finally(() => setLoading(false));
+    };
+
+    fetchCycles(); // Initial fetch
+
+    // Poll every 5 seconds to keep availability fresh
+    const interval = setInterval(fetchCycles, 5000);
+    return () => clearInterval(interval);
   }, [boarding, destination]);
 
   if (loading) return (<>
