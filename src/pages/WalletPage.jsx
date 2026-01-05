@@ -131,7 +131,10 @@ export default function WalletPage() {
         const url = `${BACKEND}/api/payments/create-order`;
         const res = await fetch(url, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify({ amount }),
         });
         if (!res.ok) {
@@ -147,7 +150,10 @@ export default function WalletPage() {
         const userId = user?._id || user?.id;
         const res = await fetch(url, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify({
                 razorpay_order_id: payload.razorpay_order_id,
                 razorpay_payment_id: payload.razorpay_payment_id,
