@@ -4,7 +4,7 @@ const Header = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   return (
-    <div className="flex justify-between px-5 items-center w-full h-12 bg-black text-white">
+    <div className="fixed top-0 left-0 right-0 z-50 flex justify-between px-5 items-center w-full h-12 bg-black text-white">
       <div className="cursor-pointer font-bold text-xl" onClick={() => navigate("/home")}>Amrita BRS</div>
       <div className="flex gap-x-10">
         <div className="cursor-pointer hover:text-gray-300" onClick={() => navigate("/home")}>Home</div>
