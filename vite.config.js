@@ -11,4 +11,22 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://bicycle-stand-locker-backend-bu4h.onrender.com',
+        changeOrigin: true,
+        secure: false,
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Spoof Origin to match backend expected origin
+            proxyReq.setHeader('Origin', 'https://bicycle-stand-locker-backend-bu4h.onrender.com');
+          });
+        }
+      }
+    }
+  },
+  define: {
+    'import.meta.env.VITE_API_BASE_URL': JSON.stringify('')
+  }
 })
