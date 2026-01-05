@@ -144,8 +144,9 @@ const BikeUnlock = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#F9F8E9] font-afacad pt-24 pb-10 px-4 lg:px-20 flex flex-col lg:flex-row gap-5">
-        <div className="lg:flex-1 w-full h-[50vh] lg:h-auto bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden">
+      <div className="min-h-screen bg-[#F9F8E9] font-afacad pt-20 px-4 lg:px-20 pb-10 flex flex-col lg:flex-row gap-5">
+        {/* Map Container - Full Width on Mobile, Half on Desktop */}
+        <div className="w-full lg:flex-1 h-[50vh] lg:h-auto bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden relative">
           <MapView
             boarding={boarding}
             destination={destination}
@@ -158,117 +159,130 @@ const BikeUnlock = () => {
           />
         </div>
 
-        <div className="flex-1 overflow-auto px-6">
-          <div className="bg-black text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">Bicycle Found Near You</div>
-          <div className="flex ">
-            <div className="flex-col flex-1 flex relative">
-              <div className="bg-[#016766] text-white flex justify-center text-3xl border cursor-pointer rounded-bl-xl p-1"
-                onClick={() => setsort(prev => ({ show: !prev.show, value: prev.value, asc: prev.asc }))}>Sort By</div>
+        {/* List Container */}
+        <div className="w-full lg:flex-1 flex flex-col">
+          <div className="bg-black text-2xl lg:text-4xl text-white font-semibold flex justify-center py-3 rounded-t-2xl">
+            Bicycle Found Near You
+          </div>
+
+          <div className="flex w-full">
+            {/* Sort Button */}
+            <div className="flex-1 relative">
+              <div
+                className="bg-[#016766] text-white flex justify-center items-center text-xl lg:text-3xl border cursor-pointer rounded-bl-xl p-2 lg:p-1 hover:bg-[#015050] transition-colors"
+                onClick={() => setsort(prev => ({ show: !prev.show, value: prev.value, asc: prev.asc }))}
+              >
+                Sort By
+              </div>
 
               {sortstate.show && (
-                <>
-                  <div className="px-3 absolute top-full left-0 w-full bg-white z-50 border-2  rounded-b-xl shadow-xl">
-                    {SORT_LABELS.map((label, idx) => {
-                      return <div key={idx} className={`mt-2 flex justify-between cursor-pointer border-1 p-1 
-                          ${sortstate.value == idx ? 'bg-black text-white' : ''}
-                        `} onClick={() => {
-                          setsort(prev => ({ show: prev.show, value: idx, asc: prev.asc }))
-                        }}>
-                        <div>{label}</div>
-                        <div onClick={() => {
+                <div className="absolute top-full left-0 w-full bg-white z-50 border-2 border-gray-200 rounded-b-xl shadow-xl">
+                  {SORT_LABELS.map((label, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex justify-between items-center cursor-pointer p-3 border-b last:border-b-0 hover:bg-gray-50
+                          ${sortstate.value === idx ? 'bg-black text-white hover:bg-gray-800' : 'text-gray-800'}
+                        `}
+                      onClick={() => setsort(prev => ({ show: prev.show, value: idx, asc: prev.asc }))}
+                    >
+                      <div className="font-semibold">{label}</div>
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setsort(prev => ({ show: prev.show, value: idx, asc: prev.asc.map((prevasc, index) => (idx === index) ? !prevasc : true) }))
-                        }}>{sortstate.asc[idx] ? <ChevronUp /> : <ChevronDown />}</div>
+                        }}
+                      >
+                        {sortstate.asc[idx] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                       </div>
-                    })}
-                    <div className="mb-2"></div>
-                  </div>
-
-                </>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
 
-
+            {/* Filter Button */}
             <div className="flex-1 relative">
-              <div className="bg-[#016766] text-white flex flex-1 justify-center text-3xl border cursor-pointer rounded-br-xl p-1"
-                onClick={() => setfilter(prev => ({ show: !prev.show, value: prev.value }))}>Filter By</div>
+              <div
+                className="bg-[#016766] text-white flex justify-center items-center text-xl lg:text-3xl border cursor-pointer rounded-br-xl p-2 lg:p-1 hover:bg-[#015050] transition-colors"
+                onClick={() => setfilter(prev => ({ show: !prev.show, value: prev.value }))}
+              >
+                Filter By
+              </div>
               {filterstate.show && (
-                <>
-                  <div className="px-3 absolute top-full left-0 w-full bg-white z-50 border-2 border-[#016766] rounded-b-xl shadow-xl">
-                    {FILTER_LABELS.map((label, idx) => {
-                      return <div key={idx} className={`mt-2 flex justify-between cursor-pointer border-1 p-1
-                          ${filterstate.value == idx ? 'bg-black text-white' : ''}
-                        `} onClick={() => {
-                          setfilter(prev => ({ show: prev.show, value: idx }))
-                        }} >
-                        <div>{label}</div>
-                      </div>
-                    })}
-                    <div className="mb-2"></div>
-                  </div>
-
-                </>
+                <div className="absolute top-full left-0 w-full bg-white z-50 border-2 border-[#016766] rounded-b-xl shadow-xl">
+                  {FILTER_LABELS.map((label, idx) => (
+                    <div
+                      key={idx}
+                      className={`cursor-pointer p-3 border-b last:border-b-0 font-semibold hover:bg-gray-50
+                          ${filterstate.value === idx ? 'bg-black text-white hover:bg-gray-800' : 'text-gray-800'}
+                        `}
+                      onClick={() => setfilter(prev => ({ show: prev.show, value: idx }))}
+                    >
+                      {label}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
 
-          {orderedCycles.map((bike) => {
-            const isSelected = selectedBikeId === bike._id;
+          <div className="mt-4 flex flex-col gap-4 overflow-y-auto max-h-[500px]">
+            {orderedCycles.map((bike) => {
+              const isSelected = selectedBikeId === bike._id;
 
-            return (
-              <>
-                <div
-                  key={bike._id}
-                  onClick={() => handleSelectBike(bike)}
-                  className={`relative flex items-center gap-5 px-2 my-3 bg-white border-2 rounded-xl cursor-pointer transition-all duration-300 ease-in-out
-                  ${isSelected ? "border-[#016766] scale-[1.01] shadow-lg shadow-[#016766]/50  hover:scale-[1.02]" : "border-gray-300  hover:scale-[1.02]"}`}
-                >
+              return (
+                <div key={bike._id} className="flex flex-col">
+                  <div
+                    onClick={() => handleSelectBike(bike)}
+                    className={`relative flex flex-col sm:flex-row items-center gap-4 p-3 bg-white border-2 rounded-xl cursor-pointer transition-all duration-300 ease-in-out
+                      ${isSelected ? "border-[#016766] ring-2 ring-[#016766]/20 shadow-lg scale-[1.01]" : "border-gray-300 hover:border-gray-400"}`}
+                  >
+                    <div className="w-full sm:w-1/3 flex justify-center">
+                      <img src={Thumbnail} alt="Bicycle-Thumbnail" className="h-24 object-contain" />
+                    </div>
 
-                  <div className="flex-1 "><img src={Thumbnail} alt="Bicycle-Thumbnail" /></div>
-                  <div className="flex-2 border bg-[#F9F8E9] my-1 p-2 rounded-xl flex flex-row h-max">
-                    <div className="flex-1">
-                      <div className="text-xl font-semibold gap-2 flex">
-                        <span>Reach destination by {Arrivaltime(bike.totalTimeMinutes).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })} </span>
-                        <span>({formatTime(bike.totalTimeMinutes)} )</span>
+                    <div className="w-full sm:w-2/3 bg-[#F9F8E9] p-3 rounded-xl flex flex-col gap-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-[#016766]">
+                            Reach by {Arrivaltime(bike.totalTimeMinutes).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span className="text-xs text-gray-600">({formatTime(bike.totalTimeMinutes)})</span>
+                        </div>
+                        <div className="text-lg font-bold">{bike.cycleName}</div>
                       </div>
-                      <div className="text-xl font-semibold">{bike.cycleName}</div>
 
-                      <div className="flex justify-between items-center ">
-                        <div className="flex gap-2">
-                          <div className="text-lg">{bike.type}</div>
-                          <span>•</span>
-                          <div className="text-lg">{bike.totalDistanceKm}km</div>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2 text-sm text-gray-700 font-medium">
+                          <span>{bike.type}</span>
+                          <span className="text-gray-400">•</span>
+                          <span>{bike.totalDistanceKm} km</span>
                         </div>
 
-                        <div className="bg-black text-white text-lg p-2 rounded-sm" onClick={(e) => {
-                          e.stopPropagation();
-                          handleStartRide(bike);
-                        }}>Book Ride</div>
-
+                        <button
+                          className="bg-black text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-gray-800 active:scale-95 transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartRide(bike);
+                          }}
+                        >
+                          Book Ride
+                        </button>
                       </div>
-
                     </div>
-
-
                   </div>
 
-                </div>
-                {isSelected && (
-                  <>
-                    <div className="bg-[#016766]/90 rounded-xl text-white p-4 animate-slidedown flex flex-row justify-around">
-                      <div className="text-xl bg-"> Walk  {formatDistance(bike.walkDistanceKm)} to bike ({formatTime(bike.walkEtaMinutes)})</div>
-                      <div className="text-xl"> Cycle {formatDistance(bike.rideDistanceKm)} to destination ({formatTime(bike.rideEtaMinutes)}) </div>
+                  {isSelected && (
+                    <div className="mt-2 bg-[#016766] rounded-xl text-white p-4 animate-slidedown flex flex-col sm:flex-row justify-between items-center gap-2 text-center text-sm sm:text-base font-medium">
+                      <div>Walk {formatDistance(bike.walkDistanceKm)} to bike ({formatTime(bike.walkEtaMinutes)})</div>
+                      <div className="hidden sm:block text-white/50">|</div>
+                      <div>Cycle {formatDistance(bike.rideDistanceKm)} to dest ({formatTime(bike.rideEtaMinutes)})</div>
                     </div>
-                    <div></div>
-                  </>
-
-                )}
-              </>
-
-            );
-          })}
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
       </div>

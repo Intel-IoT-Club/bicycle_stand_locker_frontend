@@ -292,8 +292,8 @@ const RideStart = () => {
 
 
   return (
-    <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
-      <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+    <div className="min-h-screen bg-[#F9F8E9] font-afacad p-4 lg:p-20 flex flex-col lg:flex-row gap-5">
+      <div className="w-full lg:flex-1 h-[50vh] lg:h-auto bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden relative">
         <MapView
           boarding={boarding}
           destination={destination}
@@ -305,33 +305,31 @@ const RideStart = () => {
         />
       </div>
 
-      <div className="flex-1 overflow-auto px-6">
-        <div className="bg-black text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">
+      <div className="w-full lg:flex-1 overflow-auto">
+        <div className="bg-black text-2xl lg:text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">
           Start Ride
         </div>
 
-
-        <div className="bg-white p-6 rounded-b-xl border-2 border-gray-300 mt-4">
-          <div className="flex flex-row justify-evenly ">
+        <div className="bg-white p-4 lg:p-6 rounded-b-xl border-2 border-gray-300 mt-4">
+          <div className="flex flex-col sm:flex-row justify-evenly items-center sm:items-start gap-6">
             <div className="flex gap-4 items-center">
               <img
                 src={Thumbnail}
                 alt="Bike Thumb"
-                className="w-32 h-20 object-contain"
+                className="w-32 h-20 object-contain block mx-auto"
               />
-
             </div>
 
-            <div className="mt-6 ml-12 grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 gap-4 lg:gap-8 w-full sm:w-auto text-center sm:text-left">
               <div>
-                <div className="text-xl text-gray-500">Estimated trip time</div>
-                <div className="text-3xl font-semibold">
+                <div className="text-base lg:text-xl text-gray-500">Estimated trip time</div>
+                <div className="text-xl lg:text-3xl font-semibold">
                   {formatTime(totalTime ?? totalTime)}
                 </div>
               </div>
               <div>
-                <div className="text-xl text-gray-500">Distance</div>
-                <div className="text-3xl font-semibold">
+                <div className="text-base lg:text-xl text-gray-500">Distance</div>
+                <div className="text-xl lg:text-3xl font-semibold">
                   {formatDistance(totalDist ?? totalDist)}
                 </div>
               </div>
@@ -339,39 +337,37 @@ const RideStart = () => {
           </div>
 
           {/* Show bike-specific: distance to bike and estimated arrival-to-bike if present */}
-          <div className="flex justify-evenly mt-4 gap-2 text-2xl text-gray-600">
+          <div className="flex flex-col sm:flex-row justify-evenly mt-6 gap-2 text-lg lg:text-2xl text-gray-600 text-center">
             <div>Distance to bike: {formatDistance(bike?.walkDistanceKm)} </div>
             <div>Time to reach Bicycle: {formatTime(bike?.walkEtaMinutes)}</div>
           </div>
-          <div className="flex justify-center mt-2 text-2xl text-gray-1200">
-            <div className="bg-[#016766] p-2 rounded-sm text-white">
+          <div className="flex justify-center mt-4 text-lg lg:text-2xl text-gray-1200 text-center">
+            <div className="bg-[#016766] p-2 rounded-sm text-white w-full sm:w-auto">
               Pay after Finishing Ride (Est. ₹{" "}
               {EstimatedFare})
             </div>
           </div>
-          <div className="mt-4 bg-white p-2 rounded-xl border-2 border-gray-300 text-center text-lg text-gray-700">
-            <div className="text-2xl font-semibold">Ride Rules & Penalties</div>
+          <div className="mt-4 bg-white p-3 rounded-xl border-2 border-gray-300 text-center text-base lg:text-lg text-gray-700">
+            <div className="text-xl lg:text-2xl font-semibold mb-2">Ride Rules & Penalties</div>
             <p>Damage or loss of cycle may result in penalty charges.</p>
             <p>Parking outside authorized zone incurs ₹50 fine.</p>
           </div>
-
         </div>
 
-        <div className="mt-6 bg-white p-6 rounded-xl border-2 border-gray-300">
-          <div className="text-center text-2xl text-gray-1200 mb-4">
-            <span className="font-bold">Go to Bicycle to start Ride</span>
-            <div className="text-gray-600">
-              {" "}
+        <div className="mt-6 bg-white p-4 lg:p-6 rounded-xl border-2 border-gray-300">
+          <div className="text-center text-xl lg:text-2xl text-gray-1200 mb-4">
+            <span className="font-bold block mb-2">Go to Bicycle to start Ride</span>
+            <div className="text-gray-600 text-base lg:text-lg">
               (Note: You should be at minimum of 2 meters distance closer to Bicycle to
-              Unlock and start ride){" "}
+              Unlock and start ride)
             </div>
-            <div>Walk {Math.round(bike.walkDistanceKm * 1000)} more meters to unlock</div>
+            <div className="mt-2 font-medium">Walk {Math.round(bike.walkDistanceKm * 1000)} more meters to unlock</div>
           </div>
 
           <button
             onClick={handleUnlockAndStart}
             disabled={isUnlocking}
-            className="cursor-pointer w-full py-3 text-2xl font-semibold rounded-2xl bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full py-3 text-xl lg:text-2xl font-semibold rounded-2xl bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
             title="Unlock and Start Ride"
           >
             {isUnlocking ? "Unlocking..." : "Unlock and Start Ride"}
@@ -379,10 +375,10 @@ const RideStart = () => {
         </div>
 
         {/* Extra info / actions */}
-        <div className="mt-6">
+        <div className="mt-6 flex justify-center lg:justify-start">
           <button
             onClick={() => navigate(-1)}
-            className="cursor-pointer px-6 py-2 text-lg rounded-lg border-2 border-black bg-transparent"
+            className="cursor-pointer px-6 py-2 text-lg rounded-lg border-2 border-black bg-transparent hover:bg-black hover:text-white transition-colors"
           >
             ← Back
           </button>
