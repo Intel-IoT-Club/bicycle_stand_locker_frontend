@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import HomeCycle from "../../assets/Home_Cycle.png";
 import SearchIcon from "../../assets/Search_icon.png";
 import Header from "../Header";
+import LocationInput from "./LocationInput";
 
 const Home = () => {
   const [boarding, setBoarding] = useState("");
@@ -13,7 +14,6 @@ const Home = () => {
   // Geocode place name -> coordinates
   const getCoordinates = async (place) => {
     try {
-
       const res = await fetch(
         `https://us1.locationiq.com/v1/search?key=${mapkey}&q=${encodeURIComponent(
           place
@@ -47,7 +47,6 @@ const Home = () => {
       return;
     }
 
-
     // Navigate to ride-select page with coordinates
     navigate("/ride-select", {
       state: { boarding: boardingCoords, destination: destinationCoords },
@@ -57,63 +56,62 @@ const Home = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#F9F8E9] pt-30 px-48 font-afacad m-0">
-        <div className="flex justify-between">
-          <div className="flex flex-col gap-y-8 w-1/3 ">
-            <div className="font-bold text-8xl ">Request A Ride</div>
+      <div className="min-h-screen bg-[#F9F8E9] pt-24 pb-12 px-4 sm:px-8 lg:px-20 xl:px-48 font-afacad overflow-x-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-12 lg:gap-20">
+          {/* Form Side */}
+          <div className="flex flex-col gap-y-8 w-full lg:w-1/2">
+            <h1 className="font-black text-6xl sm:text-7xl lg:text-8xl leading-tight tracking-tighter text-black uppercase">
+              Request A <span className="text-[#016766]">Ride</span>
+            </h1>
 
-            {/* Boarding input */}
-            <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center">
-              <img src={SearchIcon} className="h-8 w-8" />
-              <input
-                type="text"
-                name="boarding_point"
-                autoComplete="on"
-                placeholder="Enter Boarding Point"
+            <div className="space-y-4">
+              {/* Boarding input */}
+              <LocationInput
+                label="Enter Boarding Point"
                 value={boarding}
-                onChange={(e) => setBoarding(e.target.value)}
-                className="bg-transparent outline-none text-xl flex-1"
-                aria-label="Boarding Point"
+                onChange={setBoarding}
+                onSelect={(place) => {
+                  // Optional: Store coords immediately if needed, 
+                  // but Home currently fetches on search click. 
+                  // We can optimize later.
+                }}
               />
-            </div>
 
-            {/* Destination input */}
-            <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center">
-              <img src={SearchIcon} className="h-8 w-8" />
-              <input
-                type="text"
-                name="destination_point"
-                autoComplete="on"
-                placeholder="Enter Destination Point"
+              {/* Destination input */}
+              <LocationInput
+                label="Enter Destination Point"
                 value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="bg-transparent outline-none text-xl flex-1"
-                aria-label="Destination Point"
+                onChange={setDestination}
+                onSelect={(place) => { }}
               />
             </div>
 
-            {/* Custom clickable divs */}
-            <div className="flex w-full gap-8 text-center">
-              <div
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row w-full gap-4 pt-4">
+              <button
                 onClick={handleAbout}
-                className="p-4 flex-1 bg-[#016766] text-white rounded-md text-2xl relative overflow-hidden cursor-pointer"
+                className="p-4 flex-1 bg-[#016766] text-white rounded-2xl text-xl lg:text-2xl font-black uppercase border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
               >
                 About us
-                <div className="absolute inset-0 bg-white opacity-0 hover:opacity-25  transition-opacity rounded-md"></div>
-              </div>
+              </button>
 
-              <div
+              <button
                 onClick={handleSearch}
-                className="p-4 flex-1 bg-[#000000] text-white rounded-md text-2xl relative overflow-hidden cursor-pointer"
+                className="p-4 flex-1 bg-black text-white rounded-2xl text-xl lg:text-2xl font-black uppercase border-4 border-black shadow-[6px_6px_0px_0px_rgba(1,103,102,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
               >
                 Search Rides
-                <div className="absolute inset-0 bg-white opacity-0 hover:opacity-25 transition-opacity rounded-md"></div>
-              </div>
+              </button>
             </div>
           </div>
 
-          <div className="w-1/2">
-            <img src={HomeCycle} />
+          {/* Visual Side */}
+          <div className="w-full lg:w-1/2 relative">
+            <div className="absolute -inset-4 bg-[#016766]/10 rounded-full blur-3xl animate-pulse"></div>
+            <img
+              src={HomeCycle}
+              alt="Bicycle Illustration"
+              className="relative w-full max-w-[600px] mx-auto drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+            />
           </div>
         </div>
       </div>
@@ -122,3 +120,4 @@ const Home = () => {
 };
 
 export default Home;
+

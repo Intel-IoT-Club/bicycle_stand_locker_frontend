@@ -78,6 +78,8 @@ const RideStart = () => {
 
   const [rideObj, setRideObj] = useState(null); // created ride from server
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [wallet, setWallet] = useState(null);
+  const { user } = useAuth();
 
   // helper: are we close enough to bike? (2 meters threshold)
   const isCloseEnoughToBike = async () => {
@@ -163,9 +165,7 @@ const RideStart = () => {
     try {
       const close = await isCloseEnoughToBike();
       if (close === null) {
-        alert(
-          "Unable to get your GPS position. Cannot verify distance to bike."
-        );
+        alert("Unable to get your GPS position. Cannot verify distance to bike.");
         setIsUnlocking(false);
         return;
       }
@@ -175,47 +175,64 @@ const RideStart = () => {
         return;
       }
 
-      // Create ride (with payment.paid = false) if not yet created
-      let rideToUse;
-      try {
-        rideToUse = await createRideIfNeeded();
-      } catch (err) {
-        // createRide already showed alert for 409 or failure
-        setIsUnlocking(false);
-        return;  // <-- stops further execution
-      }
+      // 1. Fetch Latest Wallet
+      const wRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const currentWallet = wRes.data;
 
-      if (!rideToUse || !rideToUse._id) {
-        setIsUnlocking(false);
-        return;
-      }
+      // 2. Create Ride anyway if not exists
+      let rideToUse = await createRideIfNeeded();
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideToUse._id}/start`, {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
-        },
-      );
-      const updatedRide = res.data.ride || res.data;
+      if (currentWallet.balance >= EstimatedFare) {
+        // 3a. Auto-deduct from wallet
+        const payRes = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}/pay`,
+          { amount: EstimatedFare, rideId: rideToUse._id, status: 'started' },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      setRideObj(updatedRide);
-
-      setBike((prev) =>
-        prev ? { ...prev, status: "unlocked", availabilityFlag: false } : prev
-      );
-
-      alert("Ride started — bike unlocked. Have a safe ride!");
-      navigate(`/ride-tracking`, { state: { ride: updatedRide, bike } });
-    } catch (err) {
-      console.error("Failed to start ride:", err.response?.data || err.message);
-      const status = err.response?.status;
-      if (status === 400 || status === 409) {
-        alert(err.response?.data?.error || "Cannot start ride.");
+        if (payRes.data.success) {
+          alert(`₹${EstimatedFare} deducted from wallet. Ride started!`);
+          navigate(`/ride-tracking`, { state: { ride: rideToUse, bike } });
+        }
       } else {
-        alert("Server error while starting ride. See console.");
+        // 3b. Insufficient Balance - Prompt for Online Payment
+        if (window.confirm(`Insufficient wallet balance (₹${currentWallet.balance}). Pay ₹${EstimatedFare} online to start ride?`)) {
+          const orderRes = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
+            { amount: EstimatedFare },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+
+          const { order } = orderRes.data;
+          const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            amount: order.amount,
+            currency: "INR",
+            order_id: order.id,
+            handler: async (response) => {
+              try {
+                const verifyRes = await axios.post(
+                  `${import.meta.env.VITE_API_BASE_URL}/api/payments/verifyPay`,
+                  { response, ride: rideToUse, status: 'started' },
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                if (verifyRes.data.success) {
+                  alert("Payment successful! Have a safe ride!");
+                  navigate(`/ride-tracking`, { state: { ride: rideToUse, bike } });
+                }
+              } catch (err) {
+                alert("Payment verification failed.");
+              }
+            }
+          };
+          new window.Razorpay(options).open();
+        }
       }
+    } catch (err) {
+      console.error("Unlock error:", err);
+      alert(err.response?.data?.error || "Failed to start ride");
     } finally {
       setIsUnlocking(false);
     }
@@ -236,7 +253,8 @@ const RideStart = () => {
             boarding,
             bike,
             destination,
-          }
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const { geometry } = res.data || {};
@@ -248,9 +266,9 @@ const RideStart = () => {
         setBikeEtaMinutes(bike.walkEtaMinutes ?? bikeEtaMinutes);
         const fareRes = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/fare`, {
           distanceKm: bike.walkDistanceKm,
-          bikeType: bike.type,
+          baseRate: 5, // or wherever baseRate comes from
           durationMinutes: bike.walkEtaMinutes,
-        });
+        }, { headers: { Authorization: `Bearer ${token}` } });
         setEstimatedFare(fareRes.data.fare);
       } catch (err) {
         console.error("Failed to fetch ride-route:", err);
@@ -292,8 +310,9 @@ const RideStart = () => {
 
 
   return (
-    <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
-      <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
+    <div className="min-h-screen bg-[#F9F8E9] font-afacad p-4 lg:p-20 flex flex-col lg:flex-row gap-5">
+      {/* Map Section */}
+      <div className="flex-1 min-h-[400px] bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black overflow-hidden relative">
         <MapView
           boarding={boarding}
           destination={destination}
@@ -305,88 +324,94 @@ const RideStart = () => {
         />
       </div>
 
-      <div className="flex-1 overflow-auto px-6">
-        <div className="bg-black text-4xl text-white font-semibold flex justify-center py-2 rounded-t-2xl">
+      {/* Details Section */}
+      <div className="flex-1 flex flex-col gap-6 overflow-y-auto">
+        <div className="bg-black text-2xl lg:text-4xl text-white font-semibold flex justify-center py-3 rounded-2xl">
           Start Ride
         </div>
 
-
-        <div className="bg-white p-6 rounded-b-xl border-2 border-gray-300 mt-4">
-          <div className="flex flex-row justify-evenly ">
-            <div className="flex gap-4 items-center">
+        <div className="bg-white p-4 lg:p-6 rounded-2xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="bg-gray-100 p-4 rounded-xl border-2 border-black">
               <img
                 src={Thumbnail}
                 alt="Bike Thumb"
-                className="w-32 h-20 object-contain"
+                className="w-32 lg:w-48 h-auto object-contain"
               />
-
             </div>
 
-            <div className="mt-6 ml-12 grid grid-cols-2 gap-8">
-              <div>
-                <div className="text-xl text-gray-500">Estimated trip time</div>
-                <div className="text-3xl font-semibold">
-                  {formatTime(totalTime ?? totalTime)}
+            <div className="flex-1 grid grid-cols-2 gap-4 w-full">
+              <div className="bg-yellow-50 p-3 rounded-lg border-2 border-black">
+                <div className="text-sm font-bold text-gray-500 uppercase">Trip Time</div>
+                <div className="text-xl lg:text-3xl font-black">
+                  {formatTime(totalTime)}
                 </div>
               </div>
-              <div>
-                <div className="text-xl text-gray-500">Distance</div>
-                <div className="text-3xl font-semibold">
-                  {formatDistance(totalDist ?? totalDist)}
+              <div className="bg-blue-50 p-3 rounded-lg border-2 border-black">
+                <div className="text-sm font-bold text-gray-500 uppercase">Distance</div>
+                <div className="text-xl lg:text-3xl font-black">
+                  {formatDistance(totalDist)}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Show bike-specific: distance to bike and estimated arrival-to-bike if present */}
-          <div className="flex justify-evenly mt-4 gap-2 text-2xl text-gray-600">
-            <div>Distance to bike: {formatDistance(bike?.walkDistanceKm)} </div>
-            <div>Time to reach Bicycle: {formatTime(bike?.walkEtaMinutes)}</div>
-          </div>
-          <div className="flex justify-center mt-2 text-2xl text-gray-1200">
-            <div className="bg-[#016766] p-2 rounded-sm text-white">
-              Pay after Finishing Ride (Est. ₹{" "}
-              {EstimatedFare})
+          <div className="grid grid-cols-1 md:grid-cols-2 mt-6 gap-3 text-lg font-bold">
+            <div className="bg-gray-50 p-3 rounded-lg border-2 border-black flex justify-between">
+              <span className="text-gray-500">Distance to bike:</span>
+              <span>{formatDistance(bike?.walkDistanceKm)}</span>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg border-2 border-black flex justify-between">
+              <span className="text-gray-500">Time to reach:</span>
+              <span>{formatTime(bike?.walkEtaMinutes)}</span>
             </div>
           </div>
-          <div className="mt-4 bg-white p-2 rounded-xl border-2 border-gray-300 text-center text-lg text-gray-700">
-            <div className="text-2xl font-semibold">Ride Rules & Penalties</div>
-            <p>Damage or loss of cycle may result in penalty charges.</p>
-            <p>Parking outside authorized zone incurs ₹50 fine.</p>
+
+          <div className="mt-6 p-4 bg-[#016766] rounded-xl border-2 border-black text-center text-white">
+            <div className="text-sm font-bold uppercase opacity-80 mb-1">Estimated Fare</div>
+            <div className="text-4xl font-black italic">₹{EstimatedFare}</div>
+            <div className="text-xs mt-2 font-bold uppercase tracking-wider bg-black/20 py-1 rounded-full">
+              Payment Required at Start
+            </div>
           </div>
 
+          <div className="mt-6 p-4 bg-orange-50 rounded-xl border-2 border-black text-sm text-black">
+            <div className="text-lg font-black uppercase mb-2 flex items-center gap-2">
+              ⚠️ Rules & Penalties
+            </div>
+            <ul className="list-disc ml-5 space-y-1 font-semibold">
+              <li>Damage or loss may result in penalty charges.</li>
+              <li>Parking outside authorized zone incurs ₹50 fine.</li>
+            </ul>
+          </div>
         </div>
 
-        <div className="mt-6 bg-white p-6 rounded-xl border-2 border-gray-300">
-          <div className="text-center text-2xl text-gray-1200 mb-4">
-            <span className="font-bold">Go to Bicycle to start Ride</span>
-            <div className="text-gray-600">
-              {" "}
-              (Note: You should be at minimum of 2 meters distance closer to Bicycle to
-              Unlock and start ride){" "}
+        <div className="bg-white p-6 rounded-2xl border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+          <div className="text-center mb-6">
+            <div className="text-xl lg:text-2xl font-black uppercase mb-1">Go to Bicycle</div>
+            <div className="text-sm font-bold text-gray-600">
+              Must be within 2 meters to unlock
             </div>
-            <div>Walk {Math.round(bike.walkDistanceKm * 1000)} more meters to unlock</div>
+            <div className="mt-4 inline-block bg-black text-white px-4 py-1 rounded-full text-lg font-bold">
+              Walk {Math.round(bike.walkDistanceKm * 1000)}m more
+            </div>
           </div>
 
           <button
             onClick={handleUnlockAndStart}
             disabled={isUnlocking}
-            className="cursor-pointer w-full py-3 text-2xl font-semibold rounded-2xl bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Unlock and Start Ride"
+            className="w-full py-4 text-2xl font-black uppercase tracking-tighter rounded-2xl bg-black text-white hover:bg-gray-900 active:scale-95 transition-all border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,103,102,1)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isUnlocking ? "Unlocking..." : "Unlock and Start Ride"}
+            {isUnlocking ? "Unlocking..." : "Unlock & Start"}
           </button>
         </div>
 
-        {/* Extra info / actions */}
-        <div className="mt-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="cursor-pointer px-6 py-2 text-lg rounded-lg border-2 border-black bg-transparent"
-          >
-            ← Back
-          </button>
-        </div>
+        <button
+          onClick={() => navigate(-1)}
+          className="w-full lg:w-max px-8 py-3 text-lg font-black uppercase border-4 border-black bg-white hover:bg-gray-100 rounded-xl transition-all"
+        >
+          ← Back
+        </button>
       </div>
     </div>
   );
