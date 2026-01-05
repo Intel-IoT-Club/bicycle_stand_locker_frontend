@@ -1,19 +1,97 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import HomeCycle from "../../assets/Home_Cycle.png";
 import SearchIcon from "../../assets/Search_icon.png";
 import Header from "../Header";
+import axios from "axios";
 
 const Home = () => {
   const [boarding, setBoarding] = useState("");
   const [destination, setDestination] = useState("");
+
+  // Suggestion States
+  const [boardingSuggestions, setBoardingSuggestions] = useState([]);
+  const [destinationSuggestions, setDestinationSuggestions] = useState([]);
+  const [showBoardingSuggestions, setShowBoardingSuggestions] = useState(false);
+  const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false);
+
   const navigate = useNavigate();
   const mapkey = import.meta.env.VITE_MAP_ACCESS_TOKEN;
 
-  // Geocode place name -> coordinates
+  // Debounce timeout refs
+  const boardingTimeoutRef = useRef(null);
+  const destinationTimeoutRef = useRef(null);
+
+  // Wrapper for click-outside
+  const boardingWrapperRef = useRef(null);
+  const destinationWrapperRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (boardingWrapperRef.current && !boardingWrapperRef.current.contains(event.target)) {
+        setShowBoardingSuggestions(false);
+      }
+      if (destinationWrapperRef.current && !destinationWrapperRef.current.contains(event.target)) {
+        setShowDestinationSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const fetchSuggestions = async (query, setSuggestions) => {
+    if (!query || query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const res = await axios.get(`https://api.locationiq.com/v1/autocomplete`, {
+        params: {
+          key: mapkey,
+          q: query,
+          limit: 5,
+          format: "json",
+          countrycodes: "in" // Optional: restrict to India if relevant to the user context
+        }
+      });
+      setSuggestions(res.data || []);
+    } catch (err) {
+      console.error("Autocomplete error:", err);
+      setSuggestions([]);
+    }
+  };
+
+  const handleBoardingChange = (e) => {
+    const val = e.target.value;
+    setBoarding(val);
+    setShowBoardingSuggestions(true);
+
+    if (boardingTimeoutRef.current) clearTimeout(boardingTimeoutRef.current);
+    boardingTimeoutRef.current = setTimeout(() => {
+      fetchSuggestions(val, setBoardingSuggestions);
+    }, 500); // 500ms debounce
+  };
+
+  const handleDestinationChange = (e) => {
+    const val = e.target.value;
+    setDestination(val);
+    setShowDestinationSuggestions(true);
+
+    if (destinationTimeoutRef.current) clearTimeout(destinationTimeoutRef.current);
+    destinationTimeoutRef.current = setTimeout(() => {
+      fetchSuggestions(val, setDestinationSuggestions);
+    }, 500);
+  };
+
+  const selectSuggestion = (item, setVal, setShow, clearSuggestions) => {
+    setVal(item.display_name); // Or format how you want to display it
+    setShow(false);
+    clearSuggestions([]);
+  };
+
+  // Geocode place name -> coordinates (Fallback or for final check)
   const getCoordinates = async (place) => {
     try {
-
       const res = await fetch(
         `https://us1.locationiq.com/v1/search?key=${mapkey}&q=${encodeURIComponent(
           place
@@ -47,7 +125,6 @@ const Home = () => {
       return;
     }
 
-
     // Navigate to ride-select page with coordinates
     navigate("/ride-select", {
       state: { boarding: boardingCoords, destination: destinationCoords },
@@ -63,33 +140,65 @@ const Home = () => {
             <div className="font-bold text-8xl ">Request A Ride</div>
 
             {/* Boarding input */}
-            <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center">
-              <img src={SearchIcon} className="h-8 w-8" />
-              <input
-                type="text"
-                name="boarding_point"
-                autoComplete="on"
-                placeholder="Enter Boarding Point"
-                value={boarding}
-                onChange={(e) => setBoarding(e.target.value)}
-                className="bg-transparent outline-none text-xl flex-1"
-                aria-label="Boarding Point"
-              />
+            <div className="relative" ref={boardingWrapperRef}>
+              <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center z-10 relative">
+                <img src={SearchIcon} className="h-8 w-8" />
+                <input
+                  type="text"
+                  name="boarding_point"
+                  autoComplete="off"
+                  placeholder="Enter Boarding Point"
+                  value={boarding}
+                  onChange={handleBoardingChange}
+                  onFocus={() => setShowBoardingSuggestions(true)}
+                  className="bg-transparent outline-none text-xl flex-1"
+                  aria-label="Boarding Point"
+                />
+              </div>
+              {showBoardingSuggestions && boardingSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto">
+                  {boardingSuggestions.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 hover:bg-gray-100 cursor-pointer text-lg truncate border-b last:border-b-0 border-gray-100"
+                      onClick={() => selectSuggestion(item, setBoarding, setShowBoardingSuggestions, setBoardingSuggestions)}
+                    >
+                      {item.display_name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Destination input */}
-            <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center">
-              <img src={SearchIcon} className="h-8 w-8" />
-              <input
-                type="text"
-                name="destination_point"
-                autoComplete="on"
-                placeholder="Enter Destination Point"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="bg-transparent outline-none text-xl flex-1"
-                aria-label="Destination Point"
-              />
+            <div className="relative" ref={destinationWrapperRef}>
+              <div className="p-4 bg-[#787880]/16 rounded-4xl text-base pl-6 flex gap-x-4 items-center z-10 relative">
+                <img src={SearchIcon} className="h-8 w-8" />
+                <input
+                  type="text"
+                  name="destination_point"
+                  autoComplete="off"
+                  placeholder="Enter Destination Point"
+                  value={destination}
+                  onChange={handleDestinationChange}
+                  onFocus={() => setShowDestinationSuggestions(true)}
+                  className="bg-transparent outline-none text-xl flex-1"
+                  aria-label="Destination Point"
+                />
+              </div>
+              {showDestinationSuggestions && destinationSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl mt-2 shadow-xl z-50 overflow-hidden max-h-60 overflow-y-auto">
+                  {destinationSuggestions.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="p-3 hover:bg-gray-100 cursor-pointer text-lg truncate border-b last:border-b-0 border-gray-100"
+                      onClick={() => selectSuggestion(item, setDestination, setShowDestinationSuggestions, setDestinationSuggestions)}
+                    >
+                      {item.display_name}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Custom clickable divs */}
