@@ -116,7 +116,14 @@ const BikeCard = ({ bike, onDelete }) => {
             </div>
 
             <div className="flex items-center gap-6">
-                <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl grayscale group-hover:grayscale-0 transition-all">
+                <div className="w-24 h-24 bg-gray-100 rounded-2xl flex items-center justify-center text-5xl grayscale group-hover:grayscale-0 transition-all relative">
+                    {/* Status Badge */}
+                    <div className={`absolute -top-2 -left-2 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border shadow-sm ${bike.status === 'locked'
+                        ? 'bg-gray-800 text-white border-black'
+                        : 'bg-orange-100 text-orange-600 border-orange-200'
+                        }`}>
+                        {bike.status === 'locked' ? 'LOCKED' : 'UNLOCKED'}
+                    </div>
                     🚲
                 </div>
                 <div className="flex-1 space-y-3">
@@ -225,6 +232,7 @@ export default function BicycleManagement({ bikes, onRefresh, onRegister, onDele
                             displayId: bike.cycleId, // Show readable ID
                             model: bike.type,
                             available: bike.availabilityFlag,
+                            status: bike.status || 'locked', // Default to locked if undefined
                             health: bike.health || 'Excellent',
                             logs: []
                         }}
