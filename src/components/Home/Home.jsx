@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HomeCycle from "../../assets/Home_cycle.png";
+import HomeCycle from "../../assets/Home_Cycle.png";
 import SearchIcon from "../../assets/Search_icon.png";
+import Header from "../Header";
 
 const Home = () => {
   const [boarding, setBoarding] = useState("");
@@ -12,7 +13,7 @@ const Home = () => {
   // Geocode place name -> coordinates
   const getCoordinates = async (place) => {
     try {
-      
+
       const res = await fetch(
         `https://us1.locationiq.com/v1/search?key=${mapkey}&q=${encodeURIComponent(
           place
@@ -30,7 +31,7 @@ const Home = () => {
   };
 
   const handleAbout = () => {
-    alert("About us clicked ");
+    document.getElementById("about-us")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSearch = async () => {
@@ -46,7 +47,6 @@ const Home = () => {
       return;
     }
 
-    console.log({ boarding: boardingCoords, destination: destinationCoords });
 
     // Navigate to ride-select page with coordinates
     navigate("/ride-select", {
@@ -56,6 +56,7 @@ const Home = () => {
 
   return (
     <>
+      <Header />
       <div className="min-h-screen bg-[#F9F8E9] pt-30 px-48 font-afacad m-0">
         <div className="flex justify-between">
           <div className="flex flex-col gap-y-8 w-1/3 ">
@@ -66,10 +67,13 @@ const Home = () => {
               <img src={SearchIcon} className="h-8 w-8" />
               <input
                 type="text"
+                name="boarding_point"
+                autoComplete="on"
                 placeholder="Enter Boarding Point"
                 value={boarding}
                 onChange={(e) => setBoarding(e.target.value)}
                 className="bg-transparent outline-none text-xl flex-1"
+                aria-label="Boarding Point"
               />
             </div>
 
@@ -78,10 +82,13 @@ const Home = () => {
               <img src={SearchIcon} className="h-8 w-8" />
               <input
                 type="text"
+                name="destination_point"
+                autoComplete="on"
                 placeholder="Enter Destination Point"
                 value={destination}
                 onChange={(e) => setDestination(e.target.value)}
                 className="bg-transparent outline-none text-xl flex-1"
+                aria-label="Destination Point"
               />
             </div>
 

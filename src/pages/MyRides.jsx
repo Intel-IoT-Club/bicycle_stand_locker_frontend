@@ -1,152 +1,174 @@
 import Header from "../components/Header";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useAuth } from "../components/Contexts/authContext";
 
-const mockupdata=
-    [
-  {
-    "S.no": 1,
-    "Date/Time": "14/9/25 2:30 PM",
-    "Cycle-ID": "IOT-042",
-    "From": "Library",
-    "To": "Shop",
-    "Distance": "1km",
-    "Ride Time": "10:03",
-    "Fare": "₹30.03"
-  },
-  {
-    "S.no": 2,
-    "Date/Time": "14/9/25 3:05 PM",
-    "Cycle-ID": "IOT-017",
-    "From": "Hostel",
-    "To": "Canteen",
-    "Distance": "1.4km",
-    "Ride Time": "08:47",
-    "Fare": "₹25.50"
-  },
-  {
-    "S.no": 3,
-    "Date/Time": "17/9/25 5:20 PM",
-    "Cycle-ID": "IOT-078",
-    "From": "Hostel",
-    "To": "Canteen",
-    "Distance": "1.2km",
-    "Ride Time": "09:15",
-    "Fare": "₹22.60"
-  },
-  {
-    "S.no": 4,
-    "Date/Time": "16/9/25 11:45 AM",
-    "Cycle-ID": "IOT-041",
-    "From": "Station",
-    "To": "Ground",
-    "Distance": "3.8km",
-    "Ride Time": "18:27",
-    "Fare": "₹72.85"
-  },
-  {
-    "S.no": 5,
-    "Date/Time": "18/9/25 9:10 AM",
-    "Cycle-ID": "IOT-023",
-    "From": "Market",
-    "To": "Library",
-    "Distance": "2.5km",
-    "Ride Time": "14:32",
-    "Fare": "₹50.40"
-  },
-  {
-    "S.no": 6,
-    "Date/Time": "19/9/25 6:50 PM",
-    "Cycle-ID": "IOT-056",
-    "From": "Canteen",
-    "To": "Hostel",
-    "Distance": "1.3km",
-    "Ride Time": "09:02",
-    "Fare": "₹24.10"
-  },
-  {
-    "S.no": 7,
-    "Date/Time": "20/9/25 8:25 AM",
-    "Cycle-ID": "IOT-034",
-    "From": "Library",
-    "To": "Station",
-    "Distance": "4.1km",
-    "Ride Time": "19:14",
-    "Fare": "₹78.25"
-  },
-  {
-    "S.no": 8,
-    "Date/Time": "20/9/25 1:10 PM",
-    "Cycle-ID": "IOT-066",
-    "From": "Ground",
-    "To": "Market",
-    "Distance": "2.9km",
-    "Ride Time": "15:47",
-    "Fare": "₹55.60"
-  },
-  {
-    "S.no": 9,
-    "Date/Time": "21/9/25 7:40 PM",
-    "Cycle-ID": "IOT-099",
-    "From": "Hostel",
-    "To": "Library",
-    "Distance": "2.0km",
-    "Ride Time": "11:55",
-    "Fare": "₹39.20"
-  },
-  {
-    "S.no": 10,
-    "Date/Time": "22/9/25 10:15 AM",
-    "Cycle-ID": "IOT-012",
-    "From": "Station",
-    "To": "Canteen",
-    "Distance": "3.2km",
-    "Ride Time": "17:05",
-    "Fare": "₹68.10"
-  }
-]
-
-
-
-const MyRides=()=>{
-  const [cycles, setCycles] = useState([]);
+const MyRides = () => {
+  const [rides, setRides] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState({});
+  const { user, token } = useAuth();
 
   useEffect(() => {
-    axios.get("http://localhost:3000/api/cycles/all")
-      .then(res => setCycles(res.data))
-      .catch(err => console.error(err));
-  }, []);
-    return(
-        <>
-        <Header/>
-        <div className="min-h-screen bg-[#F9F8E9] pt-20 px-20 font-afacad m-0 ">
-              <div className="text-7xl font-bold">My Rides</div>
-              <div className="grid grid-cols-8 text-[#016766] text-4xl font-semibold  flex items-center">
-                  <div className="p-2">S.no</div>
-                  <div className="p-2">Date/Time</div> {/* Fix: P-2 should be p-2 */}
-                  <div className="p-2">Cycle-ID</div>
-                  <div className="p-2">From</div>
-                  <div className="p-2">To</div>
-                  <div className="p-2">Distance</div>
-                  <div className="p-2">Ride Time</div>
-                  <div className="p-2">Fare</div>
-              </div>
+    if (user && token) {
+      fetchRides();
+    }
+  }, [user, token]);
 
-              {cycles.map(ride => (
-              <div key={ride.cycleId} className="grid grid-cols-8  bg-white text-4xl flex items-center border m-4">
-                  <div className="p-2">{ride.cycleId}</div>
-                  <div className="p-2">{ride.lastSeen}</div>
-                  <div className="p-2">{ride.cycleId}</div>
-                  <div className="p-2">Station</div>
-                  <div className="p-2">Canteen</div>
-                  <div className="p-2">3.2Km</div>
-                  <div className="p-2">17:05</div>
-                  <div className="p-2">68</div>
-              </div>
-          ))}
-        </div>
-        </>
-    )
-}
+  const fetchRides = () => {
+    const riderId = user._id || user.id;
+    axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rides?riderId=${riderId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        setRides(res.data.rides || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  };
+
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleString();
+  };
+
+  const handleCancelRide = async (rideId) => {
+    if (!window.confirm("Are you sure you want to cancel this ride? No charges will be applied.")) {
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [rideId]: 'cancel' }));
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Ride cancelled successfully!");
+      fetchRides(); // Refresh the rides list
+    } catch (err) {
+      console.error("Cancel ride error:", err);
+      alert(err.response?.data?.error || "Failed to cancel ride");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [rideId]: null }));
+    }
+  };
+
+  const handleEndRide = async (rideId, ride) => {
+    if (!window.confirm("Are you sure you want to end this ride? Charges will be applied.")) {
+      return;
+    }
+
+    setActionLoading(prev => ({ ...prev, [rideId]: 'done' }));
+    try {
+      // Use current location or fallback to boarding location
+      const endLocation = ride.boarding;
+
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/rides/${rideId}/end`,
+        {
+          distanceKm: ride.distanceKm || 0,
+          timeMin: ride.timeMin || 0,
+          endLocation
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Ride ended successfully!");
+      fetchRides(); // Refresh the rides list
+    } catch (err) {
+      console.error("End ride error:", err);
+      alert(err.response?.data?.error || "Failed to end ride");
+    } finally {
+      setActionLoading(prev => ({ ...prev, [rideId]: null }));
+    }
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="min-h-screen bg-[#F9F8E9] pt-20 px-8 lg:px-20 font-afacad m-0 pb-10">
+        <div className="text-5xl lg:text-7xl font-bold mb-10 text-black">My Rides</div>
+
+        {loading ? (
+          <div className="text-2xl text-center mt-20">Loading your rides...</div>
+        ) : rides.length === 0 ? (
+          <div className="text-2xl text-center mt-20">No rides found. Start your first ride!</div>
+        ) : (
+          <div className="overflow-x-auto bg-white rounded-xl shadow-lg border border-gray-200">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#016766] text-white text-xl lg:text-2xl">
+                  <th className="p-4 border">S.no</th>
+                  <th className="p-4 border">Bicycle ID</th>
+                  <th className="p-4 border">Date/Time</th>
+                  <th className="p-4 border">Cycle</th>
+                  <th className="p-4 border">Status</th>
+                  <th className="p-4 border">Distance</th>
+                  <th className="p-4 border">Time</th>
+                  <th className="p-4 border">Fare</th>
+                  <th className="p-4 border">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rides.map((ride, index) => {
+                  const isActive = ride.status === 'started';
+                  const isLoading = actionLoading[ride._id];
+
+                  return (
+                    <tr key={ride._id} className="text-xl border-b hover:bg-gray-50">
+                      <td className="p-4">{index + 1}</td>
+                      <td className="p-4 font-mono text-sm bg-gray-50 select-all">
+                        {ride.bikeId || "N/A"}
+                      </td>
+                      <td className="p-4">{formatDate(ride.createdAt)}</td>
+                      <td className="p-4 font-mono">{ride.bikeName || "N/A"}</td>
+                      <td className="p-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${ride.status === 'finished' ? 'bg-green-100 text-green-800' :
+                            ride.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
+                          {ride.status}
+                        </span>
+                      </td>
+                      <td className="p-4">{ride.finalDistanceKm || ride.distanceKm || 0} km</td>
+                      <td className="p-4">{ride.finalDurationMin || ride.timeMin || 0} min</td>
+                      <td className="p-4 font-bold text-[#016766]">₹{ride.finalFare || ride.fare || 0}</td>
+                      <td className="p-4">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleCancelRide(ride._id)}
+                            disabled={!isActive || isLoading}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!isActive || isLoading
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-red-500 text-white hover:bg-red-600 active:scale-95'
+                              }`}
+                          >
+                            {isLoading === 'cancel' ? 'Cancelling...' : 'Cancel'}
+                          </button>
+                          <button
+                            onClick={() => handleEndRide(ride._id, ride)}
+                            disabled={!isActive || isLoading}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${!isActive || isLoading
+                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                : 'bg-green-500 text-white hover:bg-green-600 active:scale-95'
+                              }`}
+                          >
+                            {isLoading === 'done' ? 'Ending...' : 'Done'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
 
 export default MyRides;

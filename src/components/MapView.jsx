@@ -1,26 +1,34 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
-import DefaultCycle from "../assets/Default_Cycle_Icon.png";
-import SelectedCycle from "../assets/Selected_Cycle_Icon.png";
+import DefaultCycle from "../assets/Bicycle_Pin1.png";
+import SelectedCycle from "../assets/Bicycle_Pin2.png";
+import Destination from "../assets/Destination_Pin.png";
+import Boarding from "../assets/Boarding_Pin.png";
+import CurrentLocation from "../assets/Current_Location_Pin.png";
 
 const defaultBikeIcon = new L.Icon({
   iconUrl: DefaultCycle,
-  iconSize: [40, 40],
+  iconSize: [45, 50],
 });
 
 const selectedBikeIcon = new L.Icon({
   iconUrl: SelectedCycle,
-  iconSize: [45, 45],
+  iconSize: [55, 60],
 });
 
 const boardingIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [35, 35],
+  iconUrl: Boarding,
+  iconSize: [45, 50],
 });
 
 const destinationIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149059.png",
-  iconSize: [35, 35],
+  iconUrl: Destination,
+  iconSize: [45, 50],
+});
+
+const currentLocationIcon = new L.Icon({
+  iconUrl: CurrentLocation,
+  iconSize: [45, 50],
 });
 
 
@@ -31,24 +39,36 @@ const formatDistance = (km) => {
   return `${num.toFixed(2)} km`;
 };
 
-// Fit map to boarding, destination, and selected bike
-const FitBounds = ({ boarding, destination, selectedBike }) => {
+// Fit map to boarding, destination, selected bike, and current location
+import { useRef, useEffect } from "react";
+
+const FitBounds = ({ boarding, destination, selectedBike, currentLocation }) => {
   const map = useMap();
-  const points = [];
+  const fittedRef = useRef(false);
 
-  if (boarding) points.push([boarding.lat, boarding.lng]);
-  if (destination) points.push([destination.lat, destination.lng]);
-  if (selectedBike) points.push([selectedBike.location.coordinates[1], selectedBike.location.coordinates[0]]);
+  useEffect(() => {
+    const points = [];
 
-  if (points.length > 0) {
-    const bounds = L.latLngBounds(points);
-    map.fitBounds(bounds, { padding: [50, 50] });
-  }
+    if (boarding) points.push([boarding.lat, boarding.lng]);
+    if (destination) points.push([destination.lat, destination.lng]);
+    if (selectedBike?.location?.coordinates)
+      points.push([
+        selectedBike.location.coordinates[1],
+        selectedBike.location.coordinates[0]
+      ]);
+    if (currentLocation) points.push([currentLocation.lat, currentLocation.lng]);
+
+    if (points.length > 0 && !fittedRef.current) {
+      map.fitBounds(L.latLngBounds(points), { padding: [50, 50] });
+      fittedRef.current = true;
+    }
+  }, [boarding, destination, selectedBike, currentLocation]);
 
   return null;
 };
 
-const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, routeCoords, bikeDistance }) => {
+
+const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, routeCoords, bikeDistance, currentLocation }) => {
   const selectedBike = cycles.find(bike => bike._id === selectedBikeId);
 
   return (
@@ -63,7 +83,10 @@ const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, 
       />
 
       {/* Fit map to boarding, destination, selected bike */}
-      <FitBounds boarding={boarding} destination={destination} selectedBike={selectedBike} />
+      <FitBounds boarding={boarding} destination={destination} selectedBike={selectedBike} currentLocation={currentLocation} />
+
+      {/* Current Location Marker */}
+      {currentLocation && <Marker position={[currentLocation.lat, currentLocation.lng]} icon={currentLocationIcon}><Popup>You are Here</Popup></Marker>}
 
       {/* Boarding Marker */}
       {boarding && <Marker position={[boarding.lat, boarding.lng]} icon={boardingIcon}><Popup>Boarding Point</Popup></Marker>}
@@ -72,7 +95,7 @@ const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, 
       {destination && <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}><Popup>Destination</Popup></Marker>}
 
       {/* Cycles */}
-      {cycles?.map(bike => (
+      {cycles?.map(bike => bike?.location?.coordinates ?(
         <Marker
           key={bike._id}
           position={[bike.location.coordinates[1], bike.location.coordinates[0]]}
@@ -83,14 +106,14 @@ const MapView = ({ boarding, destination, cycles, selectedBikeId, onSelectBike, 
             <div>
               <strong>{bike.cycleName}</strong><br />
               Type: {bike.type}<br />
-              Status: {bike.status}<br/>
+              Status: {bike.status}<br />
               {bike._id === selectedBikeId && (
                 <span>Distance from you: {bikeDistance ? `${formatDistance(bike.walkDistanceKm)}` : "Loading..."}</span>
               )}
             </div>
           </Popup>
         </Marker>
-      ))}
+      ):null)}
 
       {routeCoords?.length > 0 && (
         <Polyline

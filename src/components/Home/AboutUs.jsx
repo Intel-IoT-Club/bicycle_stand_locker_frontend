@@ -6,7 +6,7 @@ import BarChart from "../../assets/Bar_Chart_Icon.png";
 const AboutUs = () => {
   return (
     <>
-      <div className="bg-[#F9F8E9] font-afacad min-h-screen m-0">
+      <div id="about-us" className="bg-[#F9F8E9] font-afacad min-h-screen m-0">
         {/* Header */}
         <div className="bg-gradient-to-b  from-[#016766] from-[#024A48]  via-[#082323] to-[#101010] text-center py-6">
           <h2 className="text-8xl font-bold text-white">About Us</h2>

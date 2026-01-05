@@ -4,11 +4,11 @@ export default function RazorpayButton({ order, onSuccess, onError }) {
   const handlePayment = () => {
     const options = {
       key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: order.amount,
-      currency: order.currency || 'INR',
+      amount: Number(order.amount),
+      currency: String(order.currency || 'INR'),
       name: "Smart Bicycle Rental",
       description: "Wallet Recharge",
-      order_id: order.id,
+      order_id: String(order.id),
       handler: function (response) {
         console.log('Payment successful:', response);
         onSuccess?.(response);
@@ -16,13 +16,13 @@ export default function RazorpayButton({ order, onSuccess, onError }) {
       prefill: {
         name: "Keerthi Vasan",
         email: "a.keerthivasan7676@gmail.com",
-        contact: "6374410xxx",
+        contact: "6374410000",
       },
       theme: {
-        color: "#3399cc",
+        color: "#016766",
       },
       modal: {
-        ondismiss: function() {
+        ondismiss: function () {
           console.log('Payment modal closed');
         }
       }

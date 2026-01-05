@@ -1,37 +1,31 @@
-import React from 'react';
-import bicycleIcon from '../assets/icon.png'; // Ensure this path is correct
-
-function Header({ userName, onNotificationClick, onProfileClick, className }) {
-    return (
-        <div className={`w-full py-4 px-6 flex items-center justify-between bg-[#F9F8E9] ${className}`}>
-            <div className="flex items-center gap-4">
-                {/* Green Box Icon similar to Ride Tracking map box */}
-                <div className="w-14 h-14 rounded-xl bg-[#016766] flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                     {/* Assuming icon.png exists, otherwise use a text fallback */}
-                    <img src={bicycleIcon} alt="App" className="w-8 h-8 object-contain invert brightness-0 grayscale-0" style={{ filter: 'brightness(0) invert(1)' }} /> 
-                </div>
-                <div>
-                    <h1 className="text-2xl font-bold text-black leading-none">Hello, {userName || 'Rider'}</h1>
-                    <p className="text-sm text-gray-600 font-medium mt-1">Wallet & Payments</p>
-                </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-                <button 
-                    onClick={onNotificationClick} 
-                    className="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all"
-                >
-                    🔔
-                </button>
-                <div 
-                    onClick={onProfileClick}
-                    className="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg border-2 border-black cursor-pointer"
-                >
-                    {userName ? userName[0].toUpperCase() : 'U'}
-                </div>
-            </div>
+import { useAuth } from "./Contexts/authContext";
+import { useNavigate } from "react-router-dom";
+const Header = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 flex justify-between px-5 items-center w-full h-12 bg-black text-white">
+      <div className="cursor-pointer font-bold text-xl" onClick={() => navigate("/home")}>Amrita BRS</div>
+      <div className="flex gap-x-10">
+        <div className="cursor-pointer hover:text-gray-300" onClick={() => navigate("/home")}>Home</div>
+        <div className="cursor-pointer hover:text-gray-300" onClick={() => navigate("/my-rides")}>My Rides</div>
+        <div className="cursor-pointer hover:text-gray-300" onClick={() => navigate("/wallet")}>Wallet</div>
+        <div className="flex items-center gap-x-2">
+          <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-xs">
+            {user ? user.userName.charAt(0).toUpperCase() : "A"}
+          </div>
+          <div>{user ? user.userName : "Guest"}</div>
         </div>
-    );
-}
+        {user && <div className="cursor-pointer bg-red-600 px-3 py-1 rounded hover:bg-red-700" onClick={logout}>Logout</div>}
+        {!user && (
+          <div
+            className="cursor-pointer bg-blue-600 px-3 py-1 rounded hover:bg-blue-700" onClick={() => navigate("/login")}>
+            Login
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default Header;
