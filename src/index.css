@@ -1,43 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
 @import 'leaflet/dist/leaflet.css';
 @import "tailwindcss";
 
-@theme {
-  --font-display: "Plus Jakarta Sans", "Inter", sans-serif;
-  
-  --color-primary: #016766;
-  --color-primary-dark: #01504F;
-  --color-primary-light: #028584;
-  
-  --color-surface: #ffffff;
-  --color-surface-dim: #f8fafc;
-  --color-surface-glass: rgba(255, 255, 255, 0.7);
-  
-  --color-text-main: #0f172a;
-  --color-text-muted: #64748b;
+* {
+  box-sizing: border-box;
 }
 
-@layer base {
-  body {
-    font-family: var(--font-display);
-    @apply bg-slate-50 text-slate-900;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
-@layer utilities {
-  .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lg;
-  }
-  
-  .glass-dark {
-    @apply bg-black/70 backdrop-blur-md border border-white/10 shadow-lg text-white;
-  }
-  
-  .glass-card {
-    @apply bg-white/80 backdrop-blur-sm border border-slate-200/60 shadow-sm rounded-2xl;
-  }
+.font-afacad {
+  font-family: "Afacad", sans-serif;
 }
 
 #root {

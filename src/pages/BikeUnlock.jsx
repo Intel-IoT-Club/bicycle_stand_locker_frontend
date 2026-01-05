@@ -142,7 +142,7 @@ const BikeUnlock = () => {
 
   return (
     <>
-      <div className="h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
+      <div className="max-h-screen bg-[#F9F8E9] font-afacad p-20 flex gap-5">
         <div className="flex-1 bg-[#016766] text-white flex items-center justify-center rounded-2xl border-2 border-black">
           <MapView
             boarding={boarding}
