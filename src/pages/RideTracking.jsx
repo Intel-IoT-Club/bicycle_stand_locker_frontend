@@ -235,7 +235,11 @@ const RideTracking = () => {
     if (!user?._id) return;
     const fetchWallet = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/wallet/${user._id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setWallet(res.data);
       } catch (err) {
         console.error("Failed to fetch wallet:", err);
@@ -289,6 +293,11 @@ const RideTracking = () => {
           amount: livePrice,
           rideId: ride._id,
           pin: pinInput
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         }
       );
 
@@ -304,7 +313,12 @@ const RideTracking = () => {
   const handlePayment = async () => {
     const response = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
-      { amount: livePrice }
+      { amount: livePrice },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
     );
 
     const { order } = response.data;
@@ -323,6 +337,11 @@ const RideTracking = () => {
             {
               response,
               ride
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
             }
           );
 
