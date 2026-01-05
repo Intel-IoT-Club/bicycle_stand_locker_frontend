@@ -42,7 +42,7 @@ function fireConfetti() {
 }
 
 export default function WalletPage() {
-    const { user } = useAuth();
+    const { user, token } = useAuth();
     const navigate = useNavigate();
     const [balance, setBalance] = useState(0);
     const [transactions, setTransactions] = useState([]);
@@ -51,7 +51,11 @@ export default function WalletPage() {
         if (!user) return;
         async function fetchWallet() {
             try {
-                const res = await fetch(`${BACKEND}/api/wallet/${user._id}`);
+                const res = await fetch(`${BACKEND}/api/wallet/${user._id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const contentType = res.headers.get('content-type') || '';
                 if (!res.ok) {
                     const txt = await res.text();
@@ -108,7 +112,10 @@ export default function WalletPage() {
         try {
             await fetch(`${BACKEND}/api/wallet/${user._id}/settings`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify({ autoRecharge: ar, lowBalanceThreshold: ts }),
             });
         } catch (err) {
@@ -240,7 +247,10 @@ export default function WalletPage() {
             try {
                 await fetch(`${BACKEND}/api/wallet/${user._id}/pin`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: JSON.stringify({ pin: pinInput }),
                 });
                 pushNotification("success", "Wallet PIN set and saved");
